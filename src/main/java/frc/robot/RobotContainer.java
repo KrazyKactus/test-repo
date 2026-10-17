@@ -15,25 +15,34 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
-import static frc.robot.subsystems.vision.VisionConstants.robotToCamera1;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.DyeRotorConstants;
+import frc.robot.Constants.IntakeConstants.DeployConstants;
+import frc.robot.Constants.IntakeConstants.RollerConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DyeRotorSpin;
+import frc.robot.commands.HoodIdle;
+import frc.robot.commands.IntakeDeploy;
+import frc.robot.commands.IntakeSpin;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.DyeRotorSubsystem;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.intake.DeploySubsystem;
+import frc.robot.subsystems.intake.RollerSubsystem;
+import frc.robot.subsystems.shooter.HoodSubsystem;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -46,10 +55,15 @@ public class RobotContainer {
     // Subsystems
     private final Vision vision;
     private final Drive drive;
+    private HoodSubsystem hoodSubsystem;
+    private DyeRotorSubsystem dyeRotorSubsystem;
+    private DeploySubsystem deploySubsystem;
+    private RollerSubsystem rollerSubsystem;
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
+    private boolean hasPressed = false;
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -70,6 +84,12 @@ public class RobotContainer {
                         drive,
                         new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                         new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
+
+                hoodSubsystem = new HoodSubsystem();
+                dyeRotorSubsystem = new DyeRotorSubsystem();
+                deploySubsystem = new DeploySubsystem();
+                rollerSubsystem = new RollerSubsystem();
+
                 break;
 
             case SIM:
@@ -91,6 +111,7 @@ public class RobotContainer {
                                 camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
                         new VisionIOPhotonVisionSim(
                                 camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+
                 break;
 
             default:
@@ -103,6 +124,7 @@ public class RobotContainer {
                         new ModuleIO() {},
                         (robotPose) -> {});
                 vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
+
                 break;
         }
 
@@ -131,16 +153,10 @@ public class RobotContainer {
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
         drive.setDefaultCommand(DriveCommands.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
-
-        // Lock to 0° when A button is held
-        controller
-                .a()
-                .whileTrue(DriveCommands.joystickDriveAtAngle(
-                        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
-
-        // Switch to X pattern when X button is pressed
-        controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+                drive,
+                () -> -controller.getLeftY() * (hasPressed ? 0.3 : 1),
+                () -> -controller.getLeftX() * (hasPressed ? 0.3 : 1),
+                () -> -controller.getRightX()));
 
         // Reset gyro / odometry
         final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
@@ -148,29 +164,36 @@ public class RobotContainer {
                 : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
         controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
-        // Example Coral Placement Code
-        // TODO: delete these code for your own project
-        if (Constants.currentMode == Constants.Mode.SIM) {
-            // L4 placement
-            controller.y().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
-                    .addGamePieceProjectile(new ReefscapeCoralOnFly(
-                            driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            new Translation2d(0.4, 0),
-                            driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Meters.of(2),
-                            MetersPerSecond.of(1.5),
-                            Degrees.of(-80)))));
-            // L3 placement
-            controller.b().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
-                    .addGamePieceProjectile(new ReefscapeCoralOnFly(
-                            driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            new Translation2d(0.4, 0),
-                            driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Meters.of(1.35),
-                            MetersPerSecond.of(1.5),
-                            Degrees.of(-60)))));
+        switch (Constants.currentMode) {
+            case REAL:
+                hoodSubsystem.setDefaultCommand(new HoodIdle(hoodSubsystem));
+                deploySubsystem.setDefaultCommand(new IntakeDeploy(deploySubsystem, DeployConstants.kExtended));
+
+                // run rollers in an intaking direction
+                controller.leftTrigger().whileTrue(new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed));
+
+                // run rollers in an reverse direction
+                controller.x().whileTrue(new IntakeSpin(rollerSubsystem, RollerConstants.kReverseSpeed));
+
+                // Extend and Retract Intake
+                controller.y().onTrue(new IntakeDeploy(deploySubsystem, DeployConstants.kExtended));
+
+                controller.a().onTrue(new IntakeDeploy(deploySubsystem, DeployConstants.kZero));
+
+                controller.povLeft().whileTrue(new DyeRotorSpin(dyeRotorSubsystem, DyeRotorConstants.kReverseAmperage));
+
+                controller
+                        .povDown()
+                        .whileTrue(new ParallelCommandGroup(
+                                new IntakeDeploy(deploySubsystem, 0.18),
+                                new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed)));
+
+                controller.b().onTrue(Commands.runOnce(() -> hasPressed = !hasPressed));
+
+                break;
+
+            default:
+                break;
         }
     }
 
