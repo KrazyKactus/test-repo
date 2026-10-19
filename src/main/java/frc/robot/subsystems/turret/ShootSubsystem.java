@@ -7,11 +7,11 @@ package frc.robot.subsystems.turret;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShootSubsystem extends SubsystemBase {
-  /** Creates a new ShootSubsystem. */
-  public ShootSubsystem() {}
+    /** Creates a new ShootSubsystem. */
+    public ShootSubsystem() {}
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+    }
 }
