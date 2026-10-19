@@ -13,34 +13,56 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.vision.VisionConstants.*;
+import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
+import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCamera0;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCamera1;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DyeRotorConstants;
 import frc.robot.Constants.IntakeConstants.DeployConstants;
+import frc.robot.Constants.IntakeConstants.FieldConstants;
 import frc.robot.Constants.IntakeConstants.RollerConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DyeRotorSpin;
+import frc.robot.commands.HoodAimShoot;
 import frc.robot.commands.HoodIdle;
+import frc.robot.commands.IntakeAgitate;
 import frc.robot.commands.IntakeDeploy;
 import frc.robot.commands.IntakeSpin;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.DyeRotorSubsystem;
-import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.DeploySubsystem;
 import frc.robot.subsystems.intake.RollerSubsystem;
+import frc.robot.subsystems.shooter.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.HoodSubsystem;
-import frc.robot.subsystems.vision.*;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -55,11 +77,18 @@ public class RobotContainer {
     // Subsystems
     private final Vision vision;
     private final Drive drive;
+    private FlywheelSubsystem flywheelSubsystem = new FlywheelSubsystem();
     private HoodSubsystem hoodSubsystem;
     private DyeRotorSubsystem dyeRotorSubsystem;
     private DeploySubsystem deploySubsystem;
     private RollerSubsystem rollerSubsystem;
     private SwerveDriveSimulation driveSimulation = null;
+
+    private Command deployAtZeroCommand;
+    private Command deployAtExtendCommand;
+    private Command intakeCommand;
+    private Command intakeStopCommand;
+    private Command shootCommand;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -70,6 +99,7 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
@@ -89,6 +119,29 @@ public class RobotContainer {
                 dyeRotorSubsystem = new DyeRotorSubsystem();
                 deploySubsystem = new DeploySubsystem();
                 rollerSubsystem = new RollerSubsystem();
+
+                deployAtZeroCommand = new IntakeDeploy(deploySubsystem, DeployConstants.kZero);
+                deployAtExtendCommand = new IntakeDeploy(deploySubsystem, DeployConstants.kExtended);
+                intakeCommand = new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed);
+                intakeStopCommand = new IntakeSpin(rollerSubsystem, 0);
+
+                shootCommand = new ParallelCommandGroup(
+                        new HoodAimShoot(
+                                hoodSubsystem,
+                                flywheelSubsystem,
+                                drive.calculateDistanceToPoint(
+                                        DriverStation.getAlliance().get() == Alliance.Red
+                                                ? FieldConstants.redHub
+                                                : FieldConstants.bluehub)),
+                        // new HoodAimShoot(hoodSubsystem, flywheelSubsystem, 3),
+                        new SequentialCommandGroup(
+                                new WaitCommand(0.5),
+                                new DyeRotorSpin(dyeRotorSubsystem, DyeRotorConstants.kForwardSpeed)),
+                        new SequentialCommandGroup(
+                                new WaitCommand(2),
+                                new ParallelCommandGroup(
+                                        new IntakeAgitate(deploySubsystem).repeatedly(),
+                                        new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed))));
 
                 break;
 
@@ -131,6 +184,56 @@ public class RobotContainer {
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
+        // Configure the button bindings
+        configureButtonBindings();
+        registerNamedCommands();
+        autoChooserAddOptions();
+    }
+
+    // registers all named commands for pathplanner
+    private void registerNamedCommands() {
+        switch (Constants.currentMode) {
+            case REAL:
+                NamedCommands.registerCommand("shoot", shootCommand);
+                NamedCommands.registerCommand("deployAtZero", deployAtZeroCommand);
+                NamedCommands.registerCommand("deployAtExtend", deployAtExtendCommand);
+                NamedCommands.registerCommand("intake", intakeCommand);
+                NamedCommands.registerCommand("stopIntake", intakeStopCommand);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void autoChooserAddOptions() {
+        switch (Constants.currentMode) {
+            case REAL:
+                // SideOptions
+                autoChooser.addOption("Right Side Single Cycle", new PathPlannerAuto("OneCycleAuto"));
+                autoChooser.addOption("Left Side Single Cycle", new PathPlannerAuto("OneCycleAuto", true));
+                autoChooser.addOption("Right Side 1 1/2 Cycle", new PathPlannerAuto("OneAndAHalfCycleAuto"));
+                autoChooser.addOption("Left Side 1 1/2 Cycle", new PathPlannerAuto("OneAndAHalfCycleAuto", true));
+                autoChooser.addOption("Right Side Two Cycle", new PathPlannerAuto("TwoCycleAuto"));
+                autoChooser.addOption("Left Side Two Cycle", new PathPlannerAuto("TwoCycleAuto", true));
+                autoChooser.addOption("Right Side Preload Cycle", new PathPlannerAuto("PreloadedSideAuto"));
+                autoChooser.addOption("Left Side Preload Cycle", new PathPlannerAuto("PreloadedSideAuto", true));
+
+                // CenterOptions
+                autoChooser.addOption("Center Depot Cycle", new PathPlannerAuto("CenterDepotAuto"));
+                autoChooser.addOption("Center Preload Cycle", new PathPlannerAuto("PreloadedCenterAuto"));
+
+                break;
+
+            case SIM:
+                autoChooser.addOption("Right Side Single Cycle", new PathPlannerAuto("OneCycleAutoSim"));
+
+                break;
+
+            default:
+                break;
+        }
+
         // Set up SysId routines
         autoChooser.addOption("Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
         autoChooser.addOption("Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
@@ -140,9 +243,6 @@ public class RobotContainer {
                 "Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
         autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
         autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-        // Configure the button bindings
-        configureButtonBindings();
     }
 
     /**

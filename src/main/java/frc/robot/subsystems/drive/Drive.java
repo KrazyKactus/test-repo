@@ -13,7 +13,11 @@
 
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -54,6 +58,8 @@ import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
@@ -373,6 +379,18 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
             new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
             new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+        };
+    }
+
+    public DoubleSupplier calculateDistanceToPoint(Translation2d targetPose) {
+        return () -> this.getPose().getTranslation().getDistance(targetPose);
+    }
+
+    public Supplier<Rotation2d> calculateAngleToPoint(Translation2d target) {
+        return () -> {
+            Translation2d robotTranslation = this.getPose().getTranslation();
+            Translation2d delta = target.minus(robotTranslation);
+            return delta.getAngle();
         };
     }
 }

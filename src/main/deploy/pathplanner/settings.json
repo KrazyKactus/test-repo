@@ -8,8 +8,9 @@
     "SidePaths"
   ],
   "autoFolders": [
-    "MiddleAutos",
     "LeftWithDepotAutos",
+    "MiddleAutos",
+    "SideAutosSim",
     "SideAutos"
   ],
   "defaultMaxVel": 5.0,
