@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.ShooterConstants.FlywheelConstants;
 import frc.robot.generated.TunerConstants;
 import org.littletonrobotics.junction.Logger;
@@ -99,8 +100,9 @@ public class FlywheelSubsystem extends SubsystemBase {
     }
 
     public void calculateRPS() {
-        rpsFromVelocity =
-                (2 * ((velocity) / (FlywheelConstants.kBottomWheelR1 + FlywheelConstants.kTopWheelR1)) / (2 * Math.PI));
+        double angularWheelSpeed =
+                (velocity) / (FlywheelConstants.kEfficiency * (((FlywheelConstants.kBottomWheelR1 + FlywheelConstants.kTopWheelR1) / 2)));
+        rpsFromVelocity = angularWheelSpeed / (2*Math.PI);
         Logger.recordOutput("Flywheel RPS", rpsFromVelocity, RotationsPerSecond);
     }
 

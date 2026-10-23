@@ -69,9 +69,12 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
- * little robot logic should actually be handled in the {@link Robot} periodic methods (other than the scheduler calls).
- * Instead, the structure of the robot (including subsystems, commands, and button mappings) should be declared here.
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a "declarative" paradigm, very
+ * little robot logic should actually be handled in the {@link Robot} periodic
+ * methods (other than the scheduler calls).
+ * Instead, the structure of the robot (including subsystems, commands, and
+ * button mappings) should be declared here.
  */
 public class RobotContainer {
     // Subsystems
@@ -97,7 +100,9 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
-    /** The container for the robot. Contains subsystems, OI devices, and commands. */
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
     public RobotContainer() {
 
         switch (Constants.currentMode) {
@@ -109,7 +114,8 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight),
-                        (robotPose) -> {});
+                        (robotPose) -> {
+                        });
                 vision = new Vision(
                         drive,
                         new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
@@ -147,8 +153,8 @@ public class RobotContainer {
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
-                driveSimulation =
-                        new SwerveDriveSimulation(Drive.getMapleSimConfig(), new Pose2d(3, 3, new Rotation2d()));
+                driveSimulation = new SwerveDriveSimulation(Drive.getMapleSimConfig(),
+                        new Pose2d(3, 3, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
                 drive = new Drive(
                         new GyroIOSim(driveSimulation.getGyroSimulation()),
@@ -170,13 +176,21 @@ public class RobotContainer {
             default:
                 // Replayed robot, disable IO implementations
                 drive = new Drive(
-                        new GyroIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        (robotPose) -> {});
-                vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
+                        new GyroIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        (robotPose) -> {
+                        });
+                vision = new Vision(drive, new VisionIO() {
+                }, new VisionIO() {
+                });
 
                 break;
         }
@@ -209,7 +223,7 @@ public class RobotContainer {
     private void autoChooserAddOptions() {
         switch (Constants.currentMode) {
             case REAL:
-                // SideOptions
+                // Side options
                 autoChooser.addOption("Right Side Single Cycle", new PathPlannerAuto("OneCycleAuto"));
                 autoChooser.addOption("Left Side Single Cycle", new PathPlannerAuto("OneCycleAuto", true));
                 autoChooser.addOption("Right Side 1 1/2 Cycle", new PathPlannerAuto("OneAndAHalfCycleAuto"));
@@ -219,13 +233,14 @@ public class RobotContainer {
                 autoChooser.addOption("Right Side Preload Cycle", new PathPlannerAuto("PreloadedSideAuto"));
                 autoChooser.addOption("Left Side Preload Cycle", new PathPlannerAuto("PreloadedSideAuto", true));
 
-                // CenterOptions
+                // Center options
                 autoChooser.addOption("Center Depot Cycle", new PathPlannerAuto("CenterDepotAuto"));
                 autoChooser.addOption("Center Preload Cycle", new PathPlannerAuto("PreloadedCenterAuto"));
 
                 break;
 
             case SIM:
+                // Side options with no named commands
                 autoChooser.addOption("Right Side Single Cycle", new PathPlannerAuto("OneCycleAutoSim"));
 
                 break;
@@ -246,9 +261,12 @@ public class RobotContainer {
     }
 
     /**
-     * Use this method to define your button->command mappings. Buttons can be created by instantiating a
-     * {@link GenericHID} or one of its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}),
-     * and then passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+     * Use this method to define your button->command mappings. Buttons can be
+     * created by instantiating a
+     * {@link GenericHID} or one of its subclasses
+     * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}),
+     * and then passing it to a
+     * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
@@ -307,14 +325,16 @@ public class RobotContainer {
     }
 
     public void resetSimulation() {
-        if (Constants.currentMode != Constants.Mode.SIM) return;
+        if (Constants.currentMode != Constants.Mode.SIM)
+            return;
 
         drive.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
     }
 
     public void updateSimulation() {
-        if (Constants.currentMode != Constants.Mode.SIM) return;
+        if (Constants.currentMode != Constants.Mode.SIM)
+            return;
 
         SimulatedArena.getInstance().simulationPeriodic();
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
