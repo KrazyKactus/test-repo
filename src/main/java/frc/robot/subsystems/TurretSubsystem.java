@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -35,6 +36,7 @@ public class TurretSubsystem extends SubsystemBase {
   private static final CANcoderConfiguration absoluteEncoderConfig = new CANcoderConfiguration();
 
   private static PositionDutyCycle positionRequest = new PositionDutyCycle(0);
+  private static final NeutralOut neutralRequest = new NeutralOut();
 
   public static double angle;
 
@@ -53,6 +55,12 @@ public class TurretSubsystem extends SubsystemBase {
     var feedbackConfigs = turretConfig.Feedback;
     feedbackConfigs.SensorToMechanismRatio = TurretConstants.kGearRatio;
 
+    var limitConfigs = turretConfig.SoftwareLimitSwitch;
+    limitConfigs.ForwardSoftLimitEnable = true;
+    limitConfigs.ForwardSoftLimitThreshold = TurretConstants.maxAngle;
+    limitConfigs.ReverseSoftLimitEnable = true;
+    limitConfigs.ReverseSoftLimitThreshold = TurretConstants.minAngle;
+
     var slot0Configs = turretConfig.Slot0;
     slot0Configs.kP = HoodConstants.kP;
     slot0Configs.kI = HoodConstants.kI;
@@ -62,9 +70,11 @@ public class TurretSubsystem extends SubsystemBase {
 
     kTurretMotor.clearStickyFaults();
     kTurretMotor.getConfigurator().apply(turretConfig);
+
+    kTurretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble());
   }
 
-  public static Aim solveAim(Drive drive, Translation2d target) {
+  public Aim solveAim(Drive drive, Translation2d target) {
     ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(drive.getChassisSpeeds(), drive.getRotation());
     double rotationalVel = field.omegaRadiansPerSecond;
 
@@ -101,6 +111,15 @@ public class TurretSubsystem extends SubsystemBase {
       turretRate = 0.0;
 
     return new Aim(angle, turretRate, toTarget.getNorm());
+  }
+
+  public final void setAngle(double position, double velocity) {
+    kTurretMotor.setControl(positionRequest.withPosition(position).withVelocity(velocity));
+  }
+
+  public final void stop(){
+    kTurretMotor.setControl(neutralRequest);
+    kTurretMotor.stopMotor();
   }
 
   @Override

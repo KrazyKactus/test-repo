@@ -13,21 +13,19 @@ public class FlywheelSpin extends Command {
     /** Creates a new FlywheelSpin. */
     private final FlywheelSubsystem sys_flywheel;
 
-    private final DoubleSupplier xDisplacementSupplier;
+    private final double dx;
 
-    public FlywheelSpin(FlywheelSubsystem flywheel, DoubleSupplier xDisplacementSupplier) {
+    public FlywheelSpin(FlywheelSubsystem flywheel, double distance) {
         this.sys_flywheel = flywheel;
-        this.xDisplacementSupplier = xDisplacementSupplier;
+        this.dx = distance;
         addRequirements(sys_flywheel);
-
-        this.sys_flywheel.calculateXVelocity(this.xDisplacementSupplier.getAsDouble());
         // Use addRequirements() here to declare subsystem dependencies.
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        this.sys_flywheel.calculateXVelocity(this.xDisplacementSupplier.getAsDouble());
+        this.sys_flywheel.calculateXVelocity(this.dx);
         this.sys_flywheel.calculateVelocity();
         this.sys_flywheel.calculateRPS();
         this.sys_flywheel.setVelocity(this.sys_flywheel.getRPS());
@@ -36,10 +34,6 @@ public class FlywheelSpin extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        this.sys_flywheel.calculateXVelocity(this.xDisplacementSupplier.getAsDouble());
-        this.sys_flywheel.calculateVelocity();
-        this.sys_flywheel.calculateRPS();
-        this.sys_flywheel.setVelocity(this.sys_flywheel.getRPS());
     }
 
     // Called once the command ends or is interrupted.

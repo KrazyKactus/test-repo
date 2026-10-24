@@ -17,26 +17,22 @@ public class HoodAimShoot extends ParallelCommandGroup {
     private final HoodSubsystem sys_hood;
 
     private final FlywheelSubsystem sys_flywheel;
-    private final DoubleSupplier deltaX;
+    private final double dx;
 
     private final FlywheelSpin flywheelCommand;
     private final HoodAngleSet hoodCommand;
 
-    public HoodAimShoot(HoodSubsystem hood, FlywheelSubsystem flywheel, DoubleSupplier deltaXSupplier) {
+    public HoodAimShoot(HoodSubsystem hood, FlywheelSubsystem flywheel, DoubleSupplier distance) {
         // Add your commands in the addCommands() call, e.g.
         // addCommands(new FooCommand(), new BarCommand());
         this.sys_hood = hood;
         this.sys_flywheel = flywheel;
-        this.deltaX = deltaXSupplier;
+        this.dx = distance.getAsDouble();
 
-        this.flywheelCommand = new FlywheelSpin(this.sys_flywheel, this.deltaX);
+        this.flywheelCommand = new FlywheelSpin(this.sys_flywheel, this.dx);
 
-        // this.angle = this.sys_hood.calculateAngle(this.sys_flywheel.getYVelocity(),
-        // this.sys_flywheel.getXVelocity());
-        // this.hoodCommand = new HoodAngleSet(this.sys_hood, this.angle);
-
-        this.hoodCommand =
-                new HoodAngleSet(this.sys_hood, this.sys_flywheel::getYVelocity, this.sys_flywheel::getXVelocity);
+        this.hoodCommand = new HoodAngleSet(this.sys_hood, this.sys_flywheel::getYVelocity,
+                this.sys_flywheel::getXVelocity);
 
         addCommands(flywheelCommand, hoodCommand);
     }
