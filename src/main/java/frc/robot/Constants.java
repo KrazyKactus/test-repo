@@ -26,6 +26,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
@@ -105,7 +106,6 @@ public final class Constants {
 
         public static class HoodConstants {
             public static final int kHoodID = 21;
-            public static final int kThroughboreID = 20;
 
             public static final InvertedValue kInverted = InvertedValue.Clockwise_Positive;
 
@@ -116,6 +116,34 @@ public final class Constants {
             public static final double kIdlePosition = 0.005;
 
             public static final double kP = 70, kI = 0, kD = 0.18;
+        }
+
+        public static class TurretConstants {
+            public static final int kTurretID = 24;
+
+            public static final int kThroughboreID = 20;
+
+            public static final InvertedValue kInverted = null;
+
+            public static final int kStatorCurrentLimit = 40;
+
+            public static final double kGearRatio = 0;
+
+            public static final double minAngle = Units.degreesToRadians(-270);
+            public static final double maxAngle = Units.degreesToRadians(270);
+
+            public static final double kp = 0, kI = 0, kD = 0;
+
+            public static final double kMagnetOffset = 0;
+
+            public static final double kDelay = 0; //input delay on shot
+            public static final InterpolatingDoubleTreeMap timeOfFlight = new InterpolatingDoubleTreeMap();
+            static {
+                timeOfFlight.put(1.0, 1.0);
+                timeOfFlight.put(2.0, 3.0);
+            }
+
+            public static final Translation2d robotToTurret = null;
         }
     }
 
