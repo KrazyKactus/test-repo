@@ -55,7 +55,7 @@ public class HoodSubsystem extends SubsystemBase {
 
     public double calculateAngle(
             double y, double x) { // Calculates the angle of the ball and relates it to the angle of the hood
-        angle = (Math.PI/2 - Math.atan(y / x)) * (180 / Math.PI);
+        angle = (Math.PI / 2 - Math.atan(y / x)) * (180 / Math.PI);
         return angle;
     }
 

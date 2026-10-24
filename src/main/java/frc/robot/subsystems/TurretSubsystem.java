@@ -10,9 +10,7 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,105 +23,106 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 
 public class TurretSubsystem extends SubsystemBase {
-  /** Creates a new TurretSubsystem. */
+    /** Creates a new TurretSubsystem. */
+    private static final TalonFX kTurretMotor = new TalonFX(TurretConstants.kTurretID, TunerConstants.kCANBus);
 
-  private static final TalonFX kTurretMotor = new TalonFX(TurretConstants.kTurretID, TunerConstants.kCANBus);
+    private static final CANcoder kAbsoluteEncoder =
+            new CANcoder(TurretConstants.kThroughboreID, TunerConstants.kCANBus);
 
-  private static final CANcoder kAbsoluteEncoder = new CANcoder(TurretConstants.kThroughboreID, TunerConstants.kCANBus);
+    private static final TalonFXConfiguration turretConfig = new TalonFXConfiguration();
 
-  private static final TalonFXConfiguration turretConfig = new TalonFXConfiguration();
+    private static final CANcoderConfiguration absoluteEncoderConfig = new CANcoderConfiguration();
 
-  private static final CANcoderConfiguration absoluteEncoderConfig = new CANcoderConfiguration();
+    private static PositionDutyCycle positionRequest = new PositionDutyCycle(0);
+    private static final NeutralOut neutralRequest = new NeutralOut();
 
-  private static PositionDutyCycle positionRequest = new PositionDutyCycle(0);
-  private static final NeutralOut neutralRequest = new NeutralOut();
+    public static double angle;
 
-  public static double angle;
+    public record Aim(double angle, double velocity, double distance) {}
 
-  public record Aim(double angle, double velocity, double distance) {
-  }
+    public TurretSubsystem() {
+        var currentConfigs = turretConfig.CurrentLimits;
+        currentConfigs.SupplyCurrentLimitEnable = true;
+        currentConfigs.SupplyCurrentLimit = Constants.kSupplyCurrentLimit;
 
-  public TurretSubsystem() {
-    var currentConfigs = turretConfig.CurrentLimits;
-    currentConfigs.SupplyCurrentLimitEnable = true;
-    currentConfigs.SupplyCurrentLimit = Constants.kSupplyCurrentLimit;
+        var motorOutputConfigs = turretConfig.MotorOutput;
+        motorOutputConfigs.Inverted = TurretConstants.kInverted;
+        motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
 
-    var motorOutputConfigs = turretConfig.MotorOutput;
-    motorOutputConfigs.Inverted = TurretConstants.kInverted;
-    motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
+        var feedbackConfigs = turretConfig.Feedback;
+        feedbackConfigs.SensorToMechanismRatio = TurretConstants.kGearRatio;
 
-    var feedbackConfigs = turretConfig.Feedback;
-    feedbackConfigs.SensorToMechanismRatio = TurretConstants.kGearRatio;
+        var limitConfigs = turretConfig.SoftwareLimitSwitch;
+        limitConfigs.ForwardSoftLimitEnable = true;
+        limitConfigs.ForwardSoftLimitThreshold = TurretConstants.maxAngle;
+        limitConfigs.ReverseSoftLimitEnable = true;
+        limitConfigs.ReverseSoftLimitThreshold = TurretConstants.minAngle;
 
-    var limitConfigs = turretConfig.SoftwareLimitSwitch;
-    limitConfigs.ForwardSoftLimitEnable = true;
-    limitConfigs.ForwardSoftLimitThreshold = TurretConstants.maxAngle;
-    limitConfigs.ReverseSoftLimitEnable = true;
-    limitConfigs.ReverseSoftLimitThreshold = TurretConstants.minAngle;
+        var slot0Configs = turretConfig.Slot0;
+        slot0Configs.kP = HoodConstants.kP;
+        slot0Configs.kI = HoodConstants.kI;
+        slot0Configs.kD = HoodConstants.kD;
 
-    var slot0Configs = turretConfig.Slot0;
-    slot0Configs.kP = HoodConstants.kP;
-    slot0Configs.kI = HoodConstants.kI;
-    slot0Configs.kD = HoodConstants.kD;
+        absoluteEncoderConfig.MagnetSensor.MagnetOffset = TurretConstants.kMagnetOffset;
 
-    absoluteEncoderConfig.MagnetSensor.MagnetOffset = TurretConstants.kMagnetOffset;
+        kTurretMotor.clearStickyFaults();
+        kTurretMotor.getConfigurator().apply(turretConfig);
 
-    kTurretMotor.clearStickyFaults();
-    kTurretMotor.getConfigurator().apply(turretConfig);
-
-    kTurretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble());
-  }
-
-  public Aim solveAim(Drive drive, Translation2d target) {
-    ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(drive.getChassisSpeeds(), drive.getRotation());
-    double rotationalVel = field.omegaRadiansPerSecond;
-
-    Rotation2d heading = drive.getRotation().plus(new Rotation2d(rotationalVel * TurretConstants.kDelay));
-    Translation2d robotPos = drive.getPose().getTranslation().plus(new Translation2d(
-        field.vxMetersPerSecond * TurretConstants.kDelay, field.vyMetersPerSecond * TurretConstants.kDelay));
-
-    Translation2d offset = TurretConstants.robotToTurret.rotateBy(heading);
-    Translation2d turretPos = robotPos.plus(offset);
-
-    double vx = field.vxMetersPerSecond + rotationalVel * offset.getY();
-    double vy = field.vyMetersPerSecond + rotationalVel * offset.getX();
-    Translation2d turretVel = new Translation2d(vx, vy);
-
-    Translation2d virtualTarget = target;
-    for (int i = 0; i < 4; i++) {
-      double distance = virtualTarget.minus(turretPos).getNorm();
-      double tof = TurretConstants.timeOfFlight.get(distance);
-      virtualTarget = target.minus(turretVel.times(tof));
+        kTurretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble());
     }
 
-    Translation2d toTarget = virtualTarget.minus(turretPos);
+    public Aim solveAim(Drive drive, Translation2d target) {
+        ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(drive.getChassisSpeeds(), drive.getRotation());
+        double rotationalVel = field.omegaRadiansPerSecond;
 
-    double desiredHeading = toTarget.getAngle().minus(heading).getRadians();
+        Rotation2d heading = drive.getRotation().plus(new Rotation2d(rotationalVel * TurretConstants.kDelay));
+        Translation2d robotPos = drive.getPose()
+                .getTranslation()
+                .plus(new Translation2d(
+                        field.vxMetersPerSecond * TurretConstants.kDelay,
+                        field.vyMetersPerSecond * TurretConstants.kDelay));
 
-    double wrapped = MathUtil.inputModulus(desiredHeading, TurretConstants.minAngle,
-        TurretConstants.minAngle + 2 * Math.PI);
-    double angle = MathUtil.clamp(wrapped, TurretConstants.minAngle, TurretConstants.maxAngle);
+        Translation2d offset = TurretConstants.robotToTurret.rotateBy(heading);
+        Translation2d turretPos = robotPos.plus(offset);
 
-    double r2 = Math.max(Math.pow(toTarget.getX(), 2) + Math.pow(toTarget.getY(), 2), 1e-3);
-    double bearingRate = (toTarget.getY() * vx - toTarget.getX() * vy) / r2;
-    double turretRate = bearingRate - rotationalVel;
-    if (angle != wrapped)
-      turretRate = 0.0;
+        double vx = field.vxMetersPerSecond + rotationalVel * offset.getY();
+        double vy = field.vyMetersPerSecond + rotationalVel * offset.getX();
+        Translation2d turretVel = new Translation2d(vx, vy);
 
-    return new Aim(angle, turretRate, toTarget.getNorm());
-  }
+        Translation2d virtualTarget = target;
+        for (int i = 0; i < 4; i++) {
+            double distance = virtualTarget.minus(turretPos).getNorm();
+            double tof = TurretConstants.timeOfFlight.get(distance);
+            virtualTarget = target.minus(turretVel.times(tof));
+        }
 
-  public final void setAngle(double position, double velocity) {
-    kTurretMotor.setControl(positionRequest.withPosition(position).withVelocity(velocity));
-  }
+        Translation2d toTarget = virtualTarget.minus(turretPos);
 
-  public final void stop(){
-    kTurretMotor.setControl(neutralRequest);
-    kTurretMotor.stopMotor();
-  }
+        double desiredHeading = toTarget.getAngle().minus(heading).getRadians();
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+        double wrapped =
+                MathUtil.inputModulus(desiredHeading, TurretConstants.minAngle, TurretConstants.minAngle + 2 * Math.PI);
+        double angle = MathUtil.clamp(wrapped, TurretConstants.minAngle, TurretConstants.maxAngle);
+
+        double r2 = Math.max(Math.pow(toTarget.getX(), 2) + Math.pow(toTarget.getY(), 2), 1e-3);
+        double bearingRate = (toTarget.getY() * vx - toTarget.getX() * vy) / r2;
+        double turretRate = bearingRate - rotationalVel;
+        if (angle != wrapped) turretRate = 0.0;
+
+        return new Aim(angle, turretRate, toTarget.getNorm());
+    }
+
+    public final void setAngle(double position, double velocity) {
+        kTurretMotor.setControl(positionRequest.withPosition(position).withVelocity(velocity));
+    }
+
+    public final void stop() {
+        kTurretMotor.setControl(neutralRequest);
+        kTurretMotor.stopMotor();
+    }
+
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+    }
 }

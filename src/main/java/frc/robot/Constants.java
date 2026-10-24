@@ -136,8 +136,9 @@ public final class Constants {
 
             public static final double kMagnetOffset = 0;
 
-            public static final double kDelay = 0; //input delay on shot
+            public static final double kDelay = 0; // input delay on shot
             public static final InterpolatingDoubleTreeMap timeOfFlight = new InterpolatingDoubleTreeMap();
+
             static {
                 timeOfFlight.put(1.0, 1.0);
                 timeOfFlight.put(2.0, 3.0);
