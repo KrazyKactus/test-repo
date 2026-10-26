@@ -127,7 +127,7 @@ public final class Constants {
 
             public static final int kStatorCurrentLimit = 40;
 
-            public static final double kGearRatio = 0;
+            public static final double kGearRatio = 56.25;
 
             public static final double minAngle = Units.degreesToRadians(-270);
             public static final double maxAngle = Units.degreesToRadians(270);

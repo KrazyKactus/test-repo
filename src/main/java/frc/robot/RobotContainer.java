@@ -23,6 +23,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -45,8 +46,11 @@ import frc.robot.commands.HoodIdle;
 import frc.robot.commands.IntakeAgitate;
 import frc.robot.commands.IntakeDeploy;
 import frc.robot.commands.IntakeSpin;
+import frc.robot.commands.ShootOnTheMove;
+import frc.robot.commands.TurretAngleSet;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.DyeRotorSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -62,6 +66,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -69,9 +74,12 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
- * little robot logic should actually be handled in the {@link Robot} periodic methods (other than the scheduler calls).
- * Instead, the structure of the robot (including subsystems, commands, and button mappings) should be declared here.
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a "declarative" paradigm, very
+ * little robot logic should actually be handled in the {@link Robot} periodic
+ * methods (other than the scheduler calls).
+ * Instead, the structure of the robot (including subsystems, commands, and
+ * button mappings) should be declared here.
  */
 public class RobotContainer {
     // Subsystems
@@ -82,6 +90,7 @@ public class RobotContainer {
     private DyeRotorSubsystem dyeRotorSubsystem;
     private DeploySubsystem deploySubsystem;
     private RollerSubsystem rollerSubsystem;
+    private TurretSubsystem turretSubsystem;
     private SwerveDriveSimulation driveSimulation = null;
 
     private Command deployAtZeroCommand;
@@ -89,6 +98,7 @@ public class RobotContainer {
     private Command intakeCommand;
     private Command intakeStopCommand;
     private Command shootCommand;
+    private Command turretShootCommand;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -97,7 +107,9 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
-    /** The container for the robot. Contains subsystems, OI devices, and commands. */
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
     public RobotContainer() {
 
         switch (Constants.currentMode) {
@@ -109,21 +121,29 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight),
-                        (robotPose) -> {});
+                        (robotPose) -> {
+                        });
                 vision = new Vision(
                         drive,
                         new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                        new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
+                        new VisionIOPhotonVision(VisionConstants.camera1Name, VisionConstants.robotToCamera1),
+                        new VisionIOPhotonVision(VisionConstants.camera2Name, VisionConstants.robotToCamera2)
+                    );
 
                 hoodSubsystem = new HoodSubsystem();
                 dyeRotorSubsystem = new DyeRotorSubsystem();
                 deploySubsystem = new DeploySubsystem();
                 rollerSubsystem = new RollerSubsystem();
+                turretSubsystem = new TurretSubsystem();
 
                 deployAtZeroCommand = new IntakeDeploy(deploySubsystem, DeployConstants.kZero);
                 deployAtExtendCommand = new IntakeDeploy(deploySubsystem, DeployConstants.kExtended);
                 intakeCommand = new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed);
                 intakeStopCommand = new IntakeSpin(rollerSubsystem, 0);
+
+                turretShootCommand = new ShootOnTheMove(drive, turretSubsystem, flywheelSubsystem, hoodSubsystem,
+                        DriverStation.getAlliance().isPresent() ? (DriverStation.getAlliance().get() == Alliance.Red ? FieldConstants.redHub
+                                : FieldConstants.bluehub) : new Translation2d(0, 0));
 
                 shootCommand = new ParallelCommandGroup(
                         new HoodAimShoot(
@@ -147,8 +167,8 @@ public class RobotContainer {
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
-                driveSimulation =
-                        new SwerveDriveSimulation(Drive.getMapleSimConfig(), new Pose2d(3, 3, new Rotation2d()));
+                driveSimulation = new SwerveDriveSimulation(Drive.getMapleSimConfig(),
+                        new Pose2d(3, 3, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
                 drive = new Drive(
                         new GyroIOSim(driveSimulation.getGyroSimulation()),
@@ -170,13 +190,21 @@ public class RobotContainer {
             default:
                 // Replayed robot, disable IO implementations
                 drive = new Drive(
-                        new GyroIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        (robotPose) -> {});
-                vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
+                        new GyroIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        (robotPose) -> {
+                        });
+                vision = new Vision(drive, new VisionIO() {
+                }, new VisionIO() {
+                });
 
                 break;
         }
@@ -247,9 +275,12 @@ public class RobotContainer {
     }
 
     /**
-     * Use this method to define your button->command mappings. Buttons can be created by instantiating a
-     * {@link GenericHID} or one of its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}),
-     * and then passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+     * Use this method to define your button->command mappings. Buttons can be
+     * created by instantiating a
+     * {@link GenericHID} or one of its subclasses
+     * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}),
+     * and then passing it to a
+     * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
@@ -308,14 +339,16 @@ public class RobotContainer {
     }
 
     public void resetSimulation() {
-        if (Constants.currentMode != Constants.Mode.SIM) return;
+        if (Constants.currentMode != Constants.Mode.SIM)
+            return;
 
         drive.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
     }
 
     public void updateSimulation() {
-        if (Constants.currentMode != Constants.Mode.SIM) return;
+        if (Constants.currentMode != Constants.Mode.SIM)
+            return;
 
         SimulatedArena.getInstance().simulationPeriodic();
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
