@@ -67,13 +67,13 @@ public class DeploySubsystem extends SubsystemBase {
     }
 
     public boolean isExtended() {
-        return Math.abs(deployMotor.getPosition().getValueAsDouble() - DeployConstants.kExtended)
-                <= DeployConstants.kTolerance;
+        return Math.abs(
+                deployMotor.getPosition().getValueAsDouble() - DeployConstants.kExtended) <= DeployConstants.kTolerance;
     }
 
     public boolean isRetracted() {
-        return Math.abs(deployMotor.getPosition().getValueAsDouble() - DeployConstants.kZero)
-                <= DeployConstants.kTolerance;
+        return Math.abs(
+                deployMotor.getPosition().getValueAsDouble() - DeployConstants.kZero) <= DeployConstants.kTolerance;
     }
 
     public boolean isStalled() {
@@ -85,5 +85,6 @@ public class DeploySubsystem extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {}
+    public void periodic() {
+    }
 }

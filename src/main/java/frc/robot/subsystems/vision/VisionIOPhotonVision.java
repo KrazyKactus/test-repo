@@ -32,7 +32,7 @@ public class VisionIOPhotonVision implements VisionIO {
     /**
      * Creates a new VisionIOPhotonVision.
      *
-     * @param name The configured name of the camera.
+     * @param name             The configured name of the camera.
      * @param rotationSupplier The 3D position of the camera relative to the robot.
      */
     public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
@@ -69,8 +69,7 @@ public class VisionIOPhotonVision implements VisionIO {
                 // Calculate average tag distance
                 double totalTagDistance = 0.0;
                 for (var target : result.targets) {
-                    totalTagDistance +=
-                            target.bestCameraToTarget.getTranslation().getNorm();
+                    totalTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
                 }
 
                 // Add tag IDs

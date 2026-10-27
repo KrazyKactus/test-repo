@@ -68,9 +68,12 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
- * little robot logic should actually be handled in the {@link Robot} periodic methods (other than the scheduler calls).
- * Instead, the structure of the robot (including subsystems, commands, and button mappings) should be declared here.
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a "declarative" paradigm, very
+ * little robot logic should actually be handled in the {@link Robot} periodic
+ * methods (other than the scheduler calls).
+ * Instead, the structure of the robot (including subsystems, commands, and
+ * button mappings) should be declared here.
  */
 public class RobotContainer {
     // Subsystems
@@ -98,7 +101,9 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
-    /** The container for the robot. Contains subsystems, OI devices, and commands. */
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
     public RobotContainer() {
 
         switch (Constants.currentMode) {
@@ -110,12 +115,15 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight),
-                        (robotPose) -> {});
+                        (robotPose) -> {
+                        });
                 vision = new Vision(
                         drive,
                         new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                        new VisionIOPhotonVision(VisionConstants.rightCamera, VisionConstants.robotToCameraRight),
-                        new VisionIOPhotonVision(VisionConstants.leftCamera, VisionConstants.robotToCameraLeft));
+                        new VisionIOPhotonVision(VisionConstants.rightCamera,
+                                VisionConstants.robotToCameraRight),
+                        new VisionIOPhotonVision(VisionConstants.leftCamera,
+                                VisionConstants.robotToCameraLeft));
 
                 hoodSubsystem = new HoodSubsystem();
                 dyeRotorSubsystem = new DyeRotorSubsystem();
@@ -144,25 +152,29 @@ public class RobotContainer {
                                 hoodSubsystem,
                                 flywheelSubsystem,
                                 drive.calculateDistanceToPoint(
-                                        DriverStation.getAlliance().get() == Alliance.Red
-                                                ? FieldConstants.redHub
-                                                : FieldConstants.bluehub)),
+                                        DriverStation.getAlliance()
+                                                .get() == Alliance.Red
+                                                        ? FieldConstants.redHub
+                                                        : FieldConstants.bluehub)),
                         // new HoodAimShoot(hoodSubsystem, flywheelSubsystem, 3),
                         new SequentialCommandGroup(
                                 new WaitCommand(0.5),
-                                new DyeRotorSpin(dyeRotorSubsystem, DyeRotorConstants.kForwardSpeed)),
+                                new DyeRotorSpin(dyeRotorSubsystem,
+                                        DyeRotorConstants.kForwardSpeed)),
                         new SequentialCommandGroup(
                                 new WaitCommand(2),
                                 new ParallelCommandGroup(
-                                        new IntakeAgitate(deploySubsystem).repeatedly(),
-                                        new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed))));
+                                        new IntakeAgitate(deploySubsystem)
+                                                .repeatedly(),
+                                        new IntakeSpin(rollerSubsystem,
+                                                RollerConstants.kForwardSpeed))));
 
                 break;
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
-                driveSimulation =
-                        new SwerveDriveSimulation(Drive.getMapleSimConfig(), new Pose2d(3, 3, new Rotation2d()));
+                driveSimulation = new SwerveDriveSimulation(Drive.getMapleSimConfig(),
+                        new Pose2d(3, 3, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
                 drive = new Drive(
                         new GyroIOSim(driveSimulation.getGyroSimulation()),
@@ -188,13 +200,21 @@ public class RobotContainer {
             default:
                 // Replayed robot, disable IO implementations
                 drive = new Drive(
-                        new GyroIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        (robotPose) -> {});
-                vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
+                        new GyroIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        (robotPose) -> {
+                        });
+                vision = new Vision(drive, new VisionIO() {
+                }, new VisionIO() {
+                });
 
                 break;
         }
@@ -229,23 +249,30 @@ public class RobotContainer {
             case REAL:
                 // Side options
                 autoChooser.addOption("Right Side Single Cycle", new PathPlannerAuto("OneCycleAuto"));
-                autoChooser.addOption("Left Side Single Cycle", new PathPlannerAuto("OneCycleAuto", true));
-                autoChooser.addOption("Right Side 1 1/2 Cycle", new PathPlannerAuto("OneAndAHalfCycleAuto"));
-                autoChooser.addOption("Left Side 1 1/2 Cycle", new PathPlannerAuto("OneAndAHalfCycleAuto", true));
+                autoChooser.addOption("Left Side Single Cycle",
+                        new PathPlannerAuto("OneCycleAuto", true));
+                autoChooser.addOption("Right Side 1 1/2 Cycle",
+                        new PathPlannerAuto("OneAndAHalfCycleAuto"));
+                autoChooser.addOption("Left Side 1 1/2 Cycle",
+                        new PathPlannerAuto("OneAndAHalfCycleAuto", true));
                 autoChooser.addOption("Right Side Two Cycle", new PathPlannerAuto("TwoCycleAuto"));
                 autoChooser.addOption("Left Side Two Cycle", new PathPlannerAuto("TwoCycleAuto", true));
-                autoChooser.addOption("Right Side Preload Cycle", new PathPlannerAuto("PreloadedSideAuto"));
-                autoChooser.addOption("Left Side Preload Cycle", new PathPlannerAuto("PreloadedSideAuto", true));
+                autoChooser.addOption("Right Side Preload Cycle",
+                        new PathPlannerAuto("PreloadedSideAuto"));
+                autoChooser.addOption("Left Side Preload Cycle",
+                        new PathPlannerAuto("PreloadedSideAuto", true));
 
                 // Center options
                 autoChooser.addOption("Center Depot Cycle", new PathPlannerAuto("CenterDepotAuto"));
-                autoChooser.addOption("Center Preload Cycle", new PathPlannerAuto("PreloadedCenterAuto"));
+                autoChooser.addOption("Center Preload Cycle",
+                        new PathPlannerAuto("PreloadedCenterAuto"));
 
                 break;
 
             case SIM:
                 // Side options with no named commands
-                autoChooser.addOption("Right Side Single Cycle", new PathPlannerAuto("OneCycleAutoSim"));
+                autoChooser.addOption("Right Side Single Cycle",
+                        new PathPlannerAuto("OneCycleAutoSim"));
 
                 break;
 
@@ -254,20 +281,29 @@ public class RobotContainer {
         }
 
         // Set up SysId routines
-        autoChooser.addOption("Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-        autoChooser.addOption("Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+        autoChooser.addOption("Drive Wheel Radius Characterization",
+                DriveCommands.wheelRadiusCharacterization(drive));
+        autoChooser.addOption("Drive Simple FF Characterization",
+                DriveCommands.feedforwardCharacterization(drive));
         autoChooser.addOption(
-                "Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+                "Drive SysId (Quasistatic Forward)",
+                drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         autoChooser.addOption(
-                "Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+                "Drive SysId (Quasistatic Reverse)",
+                drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption("Drive SysId (Dynamic Forward)",
+                drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption("Drive SysId (Dynamic Reverse)",
+                drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     /**
-     * Use this method to define your button->command mappings. Buttons can be created by instantiating a
-     * {@link GenericHID} or one of its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}),
-     * and then passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+     * Use this method to define your button->command mappings. Buttons can be
+     * created by instantiating a
+     * {@link GenericHID} or one of its subclasses
+     * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}),
+     * and then passing it to a
+     * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
@@ -280,32 +316,38 @@ public class RobotContainer {
         // Reset gyro / odometry
         final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
                 ? () -> drive.resetOdometry(driveSimulation.getSimulatedDriveTrainPose())
-                : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
+                : () -> drive.resetOdometry(
+                        new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
         controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
         switch (Constants.currentMode) {
             case REAL:
                 hoodSubsystem.setDefaultCommand(new HoodIdle(hoodSubsystem));
-                deploySubsystem.setDefaultCommand(new IntakeDeploy(deploySubsystem, DeployConstants.kExtended));
+                deploySubsystem.setDefaultCommand(
+                        new IntakeDeploy(deploySubsystem, DeployConstants.kExtended));
 
                 // run rollers in an intaking direction
-                controller.leftTrigger().whileTrue(new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed));
+                controller.leftTrigger().whileTrue(
+                        new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed));
 
                 // run rollers in an reverse direction
-                controller.x().whileTrue(new IntakeSpin(rollerSubsystem, RollerConstants.kReverseSpeed));
+                controller.x().whileTrue(
+                        new IntakeSpin(rollerSubsystem, RollerConstants.kReverseSpeed));
 
                 // Extend and Retract Intake
                 controller.y().onTrue(new IntakeDeploy(deploySubsystem, DeployConstants.kExtended));
 
                 controller.a().onTrue(new IntakeDeploy(deploySubsystem, DeployConstants.kZero));
 
-                controller.povLeft().whileTrue(new DyeRotorSpin(dyeRotorSubsystem, DyeRotorConstants.kReverseAmperage));
+                controller.povLeft().whileTrue(new DyeRotorSpin(dyeRotorSubsystem,
+                        DyeRotorConstants.kReverseAmperage));
 
                 controller
                         .povDown()
                         .whileTrue(new ParallelCommandGroup(
                                 new IntakeDeploy(deploySubsystem, 0.18),
-                                new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed)));
+                                new IntakeSpin(rollerSubsystem,
+                                        RollerConstants.kForwardSpeed)));
 
                 controller.b().onTrue(Commands.runOnce(() -> hasPressed = !hasPressed));
 
@@ -326,17 +368,20 @@ public class RobotContainer {
     }
 
     public void resetSimulation() {
-        if (Constants.currentMode != Constants.Mode.SIM) return;
+        if (Constants.currentMode != Constants.Mode.SIM)
+            return;
 
         drive.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
     }
 
     public void updateSimulation() {
-        if (Constants.currentMode != Constants.Mode.SIM) return;
+        if (Constants.currentMode != Constants.Mode.SIM)
+            return;
 
         SimulatedArena.getInstance().simulationPeriodic();
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-        Logger.recordOutput("FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
+        Logger.recordOutput("FieldSimulation/Fuel",
+                SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
     }
 }

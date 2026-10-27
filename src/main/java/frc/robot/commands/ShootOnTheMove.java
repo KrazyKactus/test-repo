@@ -10,6 +10,7 @@ import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.HoodSubsystem;
+import frc.robot.util.SolveAim;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -24,7 +25,8 @@ public class ShootOnTheMove extends ParallelCommandGroup {
     private final Translation2d target;
 
     public ShootOnTheMove(
-            Drive drive, TurretSubsystem turret, FlywheelSubsystem flywheel, HoodSubsystem hood, Translation2d target) {
+            Drive drive, TurretSubsystem turret, FlywheelSubsystem flywheel, HoodSubsystem hood,
+            Translation2d target) {
         this.sys_drive = drive;
         this.sys_turret = turret;
         this.sys_flywheel = flywheel;
@@ -36,9 +38,9 @@ public class ShootOnTheMove extends ParallelCommandGroup {
         addCommands(
                 new TurretAngleSet(
                         sys_turret,
-                        () -> sys_turret.solveAim(this.sys_drive, this.target).angle(),
-                        () -> sys_turret.solveAim(this.sys_drive, this.target).velocity()),
-                new HoodAimShoot(sys_hood, sys_flywheel, () -> sys_turret
+                        () -> SolveAim.solveAim(this.sys_drive, this.target).angle(),
+                        () -> SolveAim.solveAim(this.sys_drive, this.target).velocity()),
+                new HoodAimShoot(sys_hood, sys_flywheel, () -> SolveAim
                         .solveAim(this.sys_drive, this.target)
                         .distance()));
     }

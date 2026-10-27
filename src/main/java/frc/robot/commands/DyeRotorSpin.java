@@ -38,18 +38,22 @@ public class DyeRotorSpin extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        if (this.isSetpoint) this.sys_dyeRotor.setSpeed(this.setpoint);
-        if (this.isAmps) this.sys_dyeRotor.setAmps(this.amps);
+        if (this.isSetpoint)
+            this.sys_dyeRotor.setSpeed(this.setpoint);
+        if (this.isAmps)
+            this.sys_dyeRotor.setAmps(this.amps);
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
-    public void execute() {}
+    public void execute() {
+    }
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        if (interrupted) this.sys_dyeRotor.stop();
+        if (interrupted)
+            this.sys_dyeRotor.stop();
     }
 
     // Returns true when the command should end.
