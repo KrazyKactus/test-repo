@@ -5,10 +5,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.TurretSubsystem;
-import frc.robot.subsystems.TurretSubsystem.Aim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.HoodSubsystem;
@@ -25,8 +23,6 @@ public class ShootOnTheMove extends ParallelCommandGroup {
     private final HoodSubsystem sys_hood;
     private final Translation2d target;
 
-    private Aim lastAim;
-
     public ShootOnTheMove(
             Drive drive, TurretSubsystem turret, FlywheelSubsystem flywheel, HoodSubsystem hood, Translation2d target) {
         this.sys_drive = drive;
@@ -38,8 +34,12 @@ public class ShootOnTheMove extends ParallelCommandGroup {
         // Add your commands in the addCommands() call, e.g.
         // addCommands(new FooCommand(), new BarCommand());
         addCommands(
-                Commands.run(() -> lastAim = sys_turret.solveAim(this.sys_drive, target)),
-                new TurretAngleSet(sys_turret, () -> lastAim.angle(), () -> lastAim.velocity()),
-                new HoodAimShoot(sys_hood, sys_flywheel, () -> lastAim.distance()));
+                new TurretAngleSet(
+                        sys_turret,
+                        () -> sys_turret.solveAim(this.sys_drive, this.target).angle(),
+                        () -> sys_turret.solveAim(this.sys_drive, this.target).velocity()),
+                new HoodAimShoot(sys_hood, sys_flywheel, () -> sys_turret
+                        .solveAim(this.sys_drive, this.target)
+                        .distance()));
     }
 }

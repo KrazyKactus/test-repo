@@ -21,13 +21,8 @@ import static edu.wpi.first.units.Units.Amps;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -123,7 +118,7 @@ public final class Constants {
 
             public static final int kThroughboreID = 20;
 
-            public static final InvertedValue kInverted = null;
+            public static final InvertedValue kInverted = InvertedValue.CounterClockwise_Positive;
 
             public static final int kStatorCurrentLimit = 40;
 
@@ -134,7 +129,7 @@ public final class Constants {
 
             public static final double kp = 0, kI = 0, kD = 0;
 
-            public static final double kMagnetOffset = 0;
+            public static final double kMagnetOffset = 0.422;
 
             public static final double kDelay = 0; // input delay on shot
             public static final InterpolatingDoubleTreeMap timeOfFlight = new InterpolatingDoubleTreeMap();
@@ -144,7 +139,7 @@ public final class Constants {
                 timeOfFlight.put(2.0, 3.0);
             }
 
-            public static final Translation2d robotToTurret = null;
+            public static final Translation2d robotToTurret = new Translation2d(1, 1);
         }
     }
 
@@ -195,38 +190,6 @@ public final class Constants {
             public static final double kForwardSpeed = 0.95;
             public static final double kAgitateSpeed = 0.8;
             public static final double kReverseSpeed = -0.35;
-        }
-
-        public static class VisionConstants {
-
-            public static final String leftCamera = "Camera1";
-            public static final String rightCamera = "Camera4";
-
-            public static edu.wpi.first.math.Vector<N3> kSingleTagStdDevs = VecBuilder.fill(4, 4, 4);
-            public static edu.wpi.first.math.Vector<N3> kMultiTagStdDevs = VecBuilder.fill(4, 4, 4);
-
-            public static final Transform3d kLeftTranslation = new Transform3d(
-                    new Translation3d(
-                            Units.inchesToMeters(10.367), // X: centered front-back
-                            Units.inchesToMeters(7.261), // Y: 7 inches to the right
-                            Units.inchesToMeters(20.164) // Z: height above ground
-                            ),
-                    new Rotation3d(
-                            0, // Roll
-                            Units.degreesToRadians(30), // Pitch (tilt up)
-                            Units.degreesToRadians(22) // Yaw (right)
-                            ));
-            public static final Transform3d kRightTranslation = new Transform3d(
-                    new Translation3d(
-                            Units.inchesToMeters(10.367), // X: centered front-back
-                            Units.inchesToMeters(-7.261), // Y: 7 inches to the left (negative)
-                            Units.inchesToMeters(20.164) // Z: height above ground
-                            ),
-                    new Rotation3d(
-                            0, // Roll
-                            Units.degreesToRadians(30), // Pitch (tilt down)
-                            Units.degreesToRadians(-22) // Yaw (facing left)
-                            ));
         }
 
         public class FieldConstants {

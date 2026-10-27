@@ -68,7 +68,7 @@ public class TurretSubsystem extends SubsystemBase {
         kTurretMotor.clearStickyFaults();
         kTurretMotor.getConfigurator().apply(turretConfig);
 
-        kTurretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble());
+        kTurretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble() / Math.PI);
     }
 
     public Aim solveAim(Drive drive, Translation2d target) {
