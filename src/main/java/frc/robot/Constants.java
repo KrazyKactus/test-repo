@@ -28,15 +28,11 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean constants. This
- * class should not be used for any other purpose. All constants should be
- * declared globally (i.e. public static). Do
+ * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean constants. This
+ * class should not be used for any other purpose. All constants should be declared globally (i.e. public static). Do
  * not put anything functional in this class.
  *
- * <p>
- * It is advised to statically import this class (or one of its inner classes)
- * wherever the constants are needed, to
+ * <p>It is advised to statically import this class (or one of its inner classes) wherever the constants are needed, to
  * reduce verbosity.
  */
 // Ball effiency: 1.15
@@ -94,12 +90,13 @@ public final class Constants {
             public static final double kCutInertialFlywheelRadius = 0.0762; // 3in
 
             public static final double kTopWheelInertia = (kTopWheelMass * (Math.pow(kTopWheelR1, 2))) / 2; // 1/2mr^2
-            public static final double kBottomWheelInertia = (kBottomWheelMass * (Math.pow(kBottomWheelR1, 2))) / 2; // 1/2M(r1^2+r2^2)
-            public static final double kCutInertialFlywheelInertia = (kCutInertialFlywheelMass
-                    * (Math.pow(kCutInertialFlywheelRadius, 2))) / 2;
+            public static final double kBottomWheelInertia =
+                    (kBottomWheelMass * (Math.pow(kBottomWheelR1, 2))) / 2; // 1/2M(r1^2+r2^2)
+            public static final double kCutInertialFlywheelInertia =
+                    (kCutInertialFlywheelMass * (Math.pow(kCutInertialFlywheelRadius, 2))) / 2;
 
-            public static final double kTotalInertia = kTopWheelInertia * 6 + kBottomWheelInertia * 6
-                    + kCutInertialFlywheelInertia * 2; // 0.0043525kg*m^2
+            public static final double kTotalInertia =
+                    kTopWheelInertia * 6 + kBottomWheelInertia * 6 + kCutInertialFlywheelInertia * 2; // 0.0043525kg*m^2
         }
 
         public static class HoodConstants {
@@ -111,6 +108,7 @@ public final class Constants {
 
             public static final double kGearRatio = 62.5;
 
+            public static final double kMaxAngle = 35;
             public static final double kIdlePosition = 0.005;
 
             public static final double kP = 70, kI = 0, kD = 0.18;
@@ -139,7 +137,10 @@ public final class Constants {
 
             static {
                 timeOfFlight.put(1.0, 1.0);
-                timeOfFlight.put(2.0, 3.0);
+                timeOfFlight.put(1.5, 1.0);
+                timeOfFlight.put(2.0, 1.0);
+                timeOfFlight.put(2.5, 1.0);
+                timeOfFlight.put(3.0, 1.0);
             }
 
             public static final Translation2d robotToTurret = new Translation2d(1, 1);

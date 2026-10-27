@@ -21,10 +21,7 @@ import frc.robot.generated.TunerConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class FlywheelSubsystem extends SubsystemBase {
-    /**
-     * CreatesFlywheelSubsystem extends SubsystemBase { /** Creates a new
-     * ShooterSubsystem.
-     */
+    /** CreatesFlywheelSubsystem extends SubsystemBase { /** Creates a new ShooterSubsystem. */
     private static final TalonFX flywheelMotor = new TalonFX(FlywheelConstants.kFlywheelID, TunerConstants.kCANBus);
 
     private static final TalonFX followerMotor = new TalonFX(FlywheelConstants.kFollowerID, TunerConstants.kCANBus);
@@ -38,16 +35,16 @@ public class FlywheelSubsystem extends SubsystemBase {
     private static final double heightOfHub = 1.3; // Big H in metres
     private static final double heightAboveHub = 1; // Little h in metres
     private static final double yDisplacement = heightOfHub + heightAboveHub; // The height of the vertex above the
-                                                                              // ground
+    // ground
 
     public static double yVelocity = Math.sqrt(2 * Constants.kGravity * yDisplacement); // initial velocity calculated
-                                                                                        // through finding at vertex
+    // through finding at vertex
     public static double xVelocity;
     private static double velocity;
     private static double rpsFromVelocity;
 
-    private static final double time = ((yVelocity + Math.sqrt(2 * Constants.kGravity * heightAboveHub))
-            / Constants.kGravity);
+    private static final double time =
+            ((yVelocity + Math.sqrt(2 * Constants.kGravity * heightAboveHub)) / Constants.kGravity);
 
     public FlywheelSubsystem() {
         var currentConfigs = flywheelConfig.CurrentLimits;

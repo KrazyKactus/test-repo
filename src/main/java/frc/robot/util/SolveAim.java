@@ -14,8 +14,7 @@ import frc.robot.subsystems.drive.Drive;
 /** Add your docs here. */
 public class SolveAim {
 
-    public record Aim(double angle, double velocity, double distance) {
-    }
+    public record Aim(double angle, double velocity, double distance) {}
 
     public static final Aim solveAim(Drive drive, Translation2d target) {
         ChassisSpeeds field = ChassisSpeeds.fromRobotRelativeSpeeds(drive.getChassisSpeeds(), drive.getRotation());
@@ -46,15 +45,14 @@ public class SolveAim {
 
         double desiredHeading = toTarget.getAngle().minus(heading).getRadians();
 
-        double wrapped = MathUtil.inputModulus(desiredHeading, TurretConstants.minAngle,
-                TurretConstants.minAngle + 2 * Math.PI);
+        double wrapped =
+                MathUtil.inputModulus(desiredHeading, TurretConstants.minAngle, TurretConstants.minAngle + 2 * Math.PI);
         double angle = MathUtil.clamp(wrapped, TurretConstants.minAngle, TurretConstants.maxAngle);
 
         double r2 = Math.max(Math.pow(toTarget.getX(), 2) + Math.pow(toTarget.getY(), 2), 1e-3);
         double bearingRate = (toTarget.getY() * vx - toTarget.getX() * vy) / r2;
         double turretRate = bearingRate - rotationalVel;
-        if (angle != wrapped)
-            turretRate = 0.0;
+        if (angle != wrapped) turretRate = 0.0;
 
         return new Aim(angle, turretRate, toTarget.getNorm());
     }

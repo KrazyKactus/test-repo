@@ -31,8 +31,8 @@ public class HoodAimShoot extends ParallelCommandGroup {
 
         this.flywheelCommand = new FlywheelSpin(this.sys_flywheel, this.dx);
 
-        this.hoodCommand = new HoodAngleSet(this.sys_hood, this.sys_flywheel::getYVelocity,
-                this.sys_flywheel::getXVelocity);
+        this.hoodCommand =
+                new HoodAngleSet(this.sys_hood, this.sys_flywheel::getYVelocity, this.sys_flywheel::getXVelocity);
 
         addCommands(flywheelCommand, hoodCommand);
     }

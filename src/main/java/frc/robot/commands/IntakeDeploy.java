@@ -29,14 +29,12 @@ public class IntakeDeploy extends Command {
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
-    public void execute() {
-    }
+    public void execute() {}
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        if (interrupted)
-            this.sys_deploy.stop();
+        if (interrupted) this.sys_deploy.stop();
     }
 
     // Returns true when the command should end.

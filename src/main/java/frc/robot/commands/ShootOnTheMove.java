@@ -25,8 +25,7 @@ public class ShootOnTheMove extends ParallelCommandGroup {
     private final Translation2d target;
 
     public ShootOnTheMove(
-            Drive drive, TurretSubsystem turret, FlywheelSubsystem flywheel, HoodSubsystem hood,
-            Translation2d target) {
+            Drive drive, TurretSubsystem turret, FlywheelSubsystem flywheel, HoodSubsystem hood, Translation2d target) {
         this.sys_drive = drive;
         this.sys_turret = turret;
         this.sys_flywheel = flywheel;
@@ -40,8 +39,7 @@ public class ShootOnTheMove extends ParallelCommandGroup {
                         sys_turret,
                         () -> SolveAim.solveAim(this.sys_drive, this.target).angle(),
                         () -> SolveAim.solveAim(this.sys_drive, this.target).velocity()),
-                new HoodAimShoot(sys_hood, sys_flywheel, () -> SolveAim
-                        .solveAim(this.sys_drive, this.target)
+                new HoodAimShoot(sys_hood, sys_flywheel, () -> SolveAim.solveAim(this.sys_drive, this.target)
                         .distance()));
     }
 }

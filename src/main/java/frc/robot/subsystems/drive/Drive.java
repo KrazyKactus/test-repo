@@ -68,9 +68,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     // TunerConstants doesn't include these constants, so they are declared locally
-    static final double ODOMETRY_FREQUENCY = new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD()
-            ? 250.0
-            : 100.0;
+    static final double ODOMETRY_FREQUENCY =
+            new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
     public static final double DRIVE_BASE_RADIUS = Math.max(
             Math.max(
                     Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
@@ -98,8 +97,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private static DriveTrainSimulationConfig mapleSimConfig = null;
 
     public static DriveTrainSimulationConfig getMapleSimConfig() {
-        if (mapleSimConfig != null)
-            return mapleSimConfig;
+        if (mapleSimConfig != null) return mapleSimConfig;
 
         return mapleSimConfig = DriveTrainSimulationConfig.Default()
                 .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
@@ -122,20 +120,20 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
-    private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
-            AlertType.kError);
+    private final Alert gyroDisconnectedAlert =
+            new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
     private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
             new SwerveModulePosition[] {
-                    new SwerveModulePosition(),
-                    new SwerveModulePosition(),
-                    new SwerveModulePosition(),
-                    new SwerveModulePosition()
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
             };
-    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
-            lastModulePositions, new Pose2d());
+    private final SwerveDrivePoseEstimator poseEstimator =
+            new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     public Drive(
@@ -276,8 +274,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
 
     /**
-     * Stops the drive and turns the modules to an X arrangement to resist movement.
-     * The modules will return to their
+     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will return to their
      * normal orientations the next time a nonzero velocity is requested.
      */
     public void stopWithX() {
@@ -299,10 +296,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
     }
 
-    /**
-     * Returns the module states (turn angles and drive velocities) for all of the
-     * modules.
-     */
+    /** Returns the module states (turn angles and drive velocities) for all of the modules. */
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
@@ -312,10 +306,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return states;
     }
 
-    /**
-     * Returns the module positions (turn angles and drive positions) for all of the
-     * modules.
-     */
+    /** Returns the module positions (turn angles and drive positions) for all of the modules. */
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
@@ -339,10 +330,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return values;
     }
 
-    /**
-     * Returns the average velocity of the modules in rotations/sec (Phoenix native
-     * units).
-     */
+    /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
     public double getFFCharacterizationVelocity() {
         double output = 0.0;
         for (int i = 0; i < 4; i++) {
@@ -387,10 +375,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     /** Returns an array of module translations. */
     public static Translation2d[] getModuleTranslations() {
         return new Translation2d[] {
-                new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-                new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
-                new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-                new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+            new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+            new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
+            new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+            new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
         };
     }
 

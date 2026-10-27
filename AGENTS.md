@@ -489,7 +489,7 @@ public static enum Mode {
 5. **Not testing in simulation** - Always test with `Mode.SIM` before real hardware
 
 ## Team Information
-- **Team Number**: 5516 (from `.wpilib/wpilib_preferences.json`)
+- **Team Number**: 9562 (from `.wpilib/wpilib_preferences.json`)
 - **Project Year**: 2026
 - **Template**: AdvantageKit Talon Swerve Template with maple-sim
 - **Original Project**: Mechanical Advantage/AdvantageKit

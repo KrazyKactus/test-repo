@@ -16,13 +16,14 @@ import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants.HoodConstants;
 import frc.robot.Constants.ShooterConstants.TurretConstants;
 import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class TurretSubsystem extends SubsystemBase {
     /** Creates a new TurretSubsystem. */
     private static final TalonFX kTurretMotor = new TalonFX(TurretConstants.kTurretID, TunerConstants.kCANBus);
 
-    private static final CANcoder kAbsoluteEncoder = new CANcoder(TurretConstants.kThroughboreID,
-            TunerConstants.kCANBus);
+    private static final CANcoder kAbsoluteEncoder =
+            new CANcoder(TurretConstants.kThroughboreID, TunerConstants.kCANBus);
 
     private static final TalonFXConfiguration turretConfig = new TalonFXConfiguration();
 
@@ -75,6 +76,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        Logger.recordOutput("Turret Angle", kTurretMotor.getPosition().getValue());
         // This method will be called once per scheduler run
     }
 }

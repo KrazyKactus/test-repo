@@ -49,14 +49,13 @@ public class Vision extends SubsystemBase {
         // Initialize disconnected alerts
         this.disconnectedAlerts = new Alert[io.length];
         for (int i = 0; i < inputs.length; i++) {
-            disconnectedAlerts[i] = new Alert("Vision camera " + Integer.toString(i) + " is disconnected.",
-                    AlertType.kWarning);
+            disconnectedAlerts[i] =
+                    new Alert("Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
         }
     }
 
     /**
-     * Returns the X angle to the best target, which can be used for simple servoing
-     * with vision.
+     * Returns the X angle to the best target, which can be used for simple servoing with vision.
      *
      * @param cameraIndex The index of the camera to use.
      */

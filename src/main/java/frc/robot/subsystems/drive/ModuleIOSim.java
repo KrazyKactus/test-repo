@@ -25,8 +25,7 @@ import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 /**
- * Physics sim implementation of module IO. The sim models are configured using
- * a set of module constants from Phoenix.
+ * Physics sim implementation of module IO. The sim models are configured using a set of module constants from Phoenix.
  * Simulation is always based on voltage control.
  */
 public class ModuleIOSim implements ModuleIO {
@@ -86,18 +85,22 @@ public class ModuleIOSim implements ModuleIO {
         // Update drive inputs
         inputs.driveConnected = true;
         inputs.drivePositionRad = moduleSimulation.getDriveWheelFinalPosition().in(Radians);
-        inputs.driveVelocityRadPerSec = moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
+        inputs.driveVelocityRadPerSec =
+                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
         inputs.driveAppliedVolts = driveAppliedVolts;
-        inputs.driveCurrentAmps = Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
+        inputs.driveCurrentAmps =
+                Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
 
         // Update turn inputs
         inputs.turnConnected = true;
         inputs.turnEncoderConnected = true;
         inputs.turnAbsolutePosition = moduleSimulation.getSteerAbsoluteFacing();
         inputs.turnPosition = moduleSimulation.getSteerAbsoluteFacing();
-        inputs.turnVelocityRadPerSec = moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
+        inputs.turnVelocityRadPerSec =
+                moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
         inputs.turnAppliedVolts = turnAppliedVolts;
-        inputs.turnCurrentAmps = Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
+        inputs.turnCurrentAmps =
+                Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
 
         // Update odometry inputs (50Hz because high-frequency odometry in sim doesn't
         // matter)

@@ -40,8 +40,7 @@ public class HoodAngleSet extends Command {
 
     // Called when the command is initially scheduled.
     @Override
-    public void initialize() {
-    }
+    public void initialize() {}
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
@@ -49,15 +48,13 @@ public class HoodAngleSet extends Command {
         if (isTan) {
             this.sys_hood.setAngle(this.sys_hood.calculateAngle(vY, vX));
         }
-        if (isAngle)
-            this.sys_hood.setAngle(setpoint);
+        if (isAngle) this.sys_hood.setAngle(setpoint);
     }
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        if (interrupted)
-            new HoodIdle(this.sys_hood);
+        if (interrupted) new HoodIdle(this.sys_hood);
     }
 
     // Returns true when the command should end.
