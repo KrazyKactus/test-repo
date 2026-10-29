@@ -273,10 +273,10 @@ public class RobotContainer {
         // Default command, normal field-relative drive
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive,
-                () -> -controller.getLeftY() * (hasPressed ? 0.3 : 1),
-                () -> -controller.getLeftX() * (hasPressed ? 0.3 : 1),
-                () -> -controller.getRightX()));
-
+                () -> controller.getLeftY(),
+                () -> controller.getLeftX(),
+                () -> -controller.getRightX(),
+                () -> hasPressed ? 0.3 : 1));
         // Reset gyro / odometry
         final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
                 ? () -> drive.resetOdometry(driveSimulation.getSimulatedDriveTrainPose())
@@ -300,6 +300,14 @@ public class RobotContainer {
                 controller.a().onTrue(new IntakeDeploy(deploySubsystem, DeployConstants.kZero));
 
                 controller.povLeft().whileTrue(new DyeRotorSpin(dyeRotorSubsystem, DyeRotorConstants.kReverseAmperage));
+
+                controller
+                        .rightTrigger()
+                        .whileTrue(new ParallelCommandGroup(
+                                new SequentialCommandGroup(
+                                        new WaitCommand(0.5),
+                                        new DyeRotorSpin(dyeRotorSubsystem, DyeRotorConstants.kForwardAmperage)),
+                                new HoodAimShoot(hoodSubsystem, flywheelSubsystem, () -> 2)));
 
                 controller
                         .povDown()

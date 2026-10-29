@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import frc.robot.Constants.ShooterConstants.FlywheelConstants;
 import frc.robot.subsystems.shooter.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.HoodSubsystem;
 import java.util.function.DoubleSupplier;
@@ -18,6 +19,8 @@ public class HoodAimShoot extends ParallelCommandGroup {
 
     private final FlywheelSubsystem sys_flywheel;
     private final double dx;
+    private final double vx;
+    private final double rps;
 
     private final FlywheelSpin flywheelCommand;
     private final HoodAngleSet hoodCommand;
@@ -28,11 +31,12 @@ public class HoodAimShoot extends ParallelCommandGroup {
         this.sys_hood = hood;
         this.sys_flywheel = flywheel;
         this.dx = distance.getAsDouble();
+        this.vx = this.sys_flywheel.calculateXVelocity(this.dx);
+        this.rps = this.sys_flywheel.calculateRPS(this.sys_flywheel.calculateVelocity(FlywheelConstants.vy, vx));
 
-        this.flywheelCommand = new FlywheelSpin(this.sys_flywheel, this.dx);
+        this.flywheelCommand = new FlywheelSpin(this.sys_flywheel, this.rps);
 
-        this.hoodCommand =
-                new HoodAngleSet(this.sys_hood, this.sys_flywheel::getYVelocity, this.sys_flywheel::getXVelocity);
+        this.hoodCommand = new HoodAngleSet(this.sys_hood, this.sys_hood.calculateAngle(FlywheelConstants.vy, vx));
 
         addCommands(flywheelCommand, hoodCommand);
     }

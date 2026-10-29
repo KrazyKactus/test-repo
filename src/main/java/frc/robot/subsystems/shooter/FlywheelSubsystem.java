@@ -4,9 +4,6 @@
 
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -32,19 +29,9 @@ public class FlywheelSubsystem extends SubsystemBase {
     private static NeutralOut neutralRequest = new NeutralOut();
     private static Follower followRequest = new Follower(FlywheelConstants.kFlywheelID, MotorAlignmentValue.Opposed);
 
-    private static final double heightOfHub = 1.3; // Big H in metres
-    private static final double heightAboveHub = 1; // Little h in metres
-    private static final double yDisplacement = heightOfHub + heightAboveHub; // The height of the vertex above the
-    // ground
-
-    public static double yVelocity = Math.sqrt(2 * Constants.kGravity * yDisplacement); // initial velocity calculated
-    // through finding at vertex
-    public static double xVelocity;
-    private static double velocity;
-    private static double rpsFromVelocity;
-
-    private static final double time =
-            ((yVelocity + Math.sqrt(2 * Constants.kGravity * heightAboveHub)) / Constants.kGravity);
+    public double vx;
+    private double velocity;
+    private double rps;
 
     public FlywheelSubsystem() {
         var currentConfigs = flywheelConfig.CurrentLimits;
@@ -70,40 +57,30 @@ public class FlywheelSubsystem extends SubsystemBase {
         followerMotor.getConfigurator().apply(followerConfig);
     }
 
-    public double getYVelocity() {
-        return yVelocity;
+    public double getRPS() {
+        return this.rps;
+    }
+
+    public double calculateXVelocity(double dx) {
+        this.vx = dx / FlywheelConstants.kTime;
+        return this.vx;
+    }
+
+    public double calculateVelocity(double vy, double vx) { // Pythagorean theorem to calculate the velocity of the ball
+        this.velocity = Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2));
+        return this.velocity;
+    }
+
+    public double calculateRPS(double v) {
+        double angularWheelSpeed = (v)
+                / (FlywheelConstants.kEfficiency
+                        * (((FlywheelConstants.kBottomWheelR1 + FlywheelConstants.kTopWheelR1) / 2)));
+        this.rps = angularWheelSpeed / (2 * Math.PI);
+        return this.rps;
     }
 
     public double getXVelocity() {
-        return xVelocity;
-    }
-
-    public double getRPS() {
-        return rpsFromVelocity;
-    }
-
-    public double getError() {
-        double error = Math.abs(flywheelMotor.getClosedLoopError().getValue());
-        Logger.recordOutput("Flywheel error", error);
-        return error;
-    }
-
-    public void calculateXVelocity(double xDisplacement) {
-        xVelocity = xDisplacement / time;
-        Logger.recordOutput("Flywheel X Velocity", xVelocity, MetersPerSecond);
-    }
-
-    public void calculateVelocity() { // Pythagorean theorem to calculate the velocity of the ball (speed for thing)
-        velocity = Math.sqrt(Math.pow(xVelocity, 2) + Math.pow(yVelocity, 2));
-        Logger.recordOutput("Flywheel Velocity", velocity, MetersPerSecond);
-    }
-
-    public void calculateRPS() {
-        double angularWheelSpeed = (velocity)
-                / (FlywheelConstants.kEfficiency
-                        * (((FlywheelConstants.kBottomWheelR1 + FlywheelConstants.kTopWheelR1) / 2)));
-        rpsFromVelocity = angularWheelSpeed / (2 * Math.PI);
-        Logger.recordOutput("Flywheel RPS", rpsFromVelocity, RotationsPerSecond);
+        return this.vx;
     }
 
     public void setVelocity(double rps) {
@@ -121,6 +98,14 @@ public class FlywheelSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        Logger.recordOutput("Flywheel Speed", flywheelMotor.getVelocity().getValue());
+        Logger.recordOutput("Flywheel/Calculated/X Velocity", this.vx);
+        Logger.recordOutput("Flywheel/Calculated/Y Velocity", FlywheelConstants.vy);
+        Logger.recordOutput("Flywheel/Calculated/Velocity", this.velocity);
+        Logger.recordOutput("Flywheel/Calculated/RPS", this.rps);
+        Logger.recordOutput("Flywheel/Velocity", flywheelMotor.getVelocity().getValueAsDouble());
+        Logger.recordOutput(
+                "Flywheel/Supply Current", flywheelMotor.getSupplyCurrent().getValueAsDouble());
+        Logger.recordOutput(
+                "Flywheel/Stator Current", flywheelMotor.getStatorCurrent().getValueAsDouble());
     }
 }

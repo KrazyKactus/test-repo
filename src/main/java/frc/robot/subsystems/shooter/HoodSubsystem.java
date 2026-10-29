@@ -12,16 +12,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants.HoodConstants;
 import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class HoodSubsystem extends SubsystemBase {
     /** Creates a new HoodSubsystem. */
-    private static final TalonFX kHoodMotor = new TalonFX(HoodConstants.kHoodID, TunerConstants.kCANBus);
+    private static final TalonFX hoodMotor = new TalonFX(HoodConstants.kHoodID, TunerConstants.kCANBus);
 
     private static final TalonFXConfiguration hoodConfig = new TalonFXConfiguration();
 
     private static PositionDutyCycle positionRequest = new PositionDutyCycle(0);
 
-    public static double angle;
+    public double angle;
 
     public HoodSubsystem() {
         var currentConfigs = hoodConfig.CurrentLimits;
@@ -40,31 +41,35 @@ public class HoodSubsystem extends SubsystemBase {
         slot0Configs.kI = HoodConstants.kI;
         slot0Configs.kD = HoodConstants.kD;
 
-        kHoodMotor.clearStickyFaults();
-        kHoodMotor.getConfigurator().apply(hoodConfig);
-        kHoodMotor.setPosition(0);
+        hoodMotor.clearStickyFaults();
+        hoodMotor.getConfigurator().apply(hoodConfig);
+        hoodMotor.setPosition(0);
     }
 
     public double getError() {
-        return kHoodMotor.getClosedLoopError().getValue();
+        return hoodMotor.getClosedLoopError().getValue();
     }
 
     public double getAngle() {
-        return angle;
+        return this.angle;
     }
 
     public double calculateAngle(
             double y, double x) { // Calculates the angle of the ball and relates it to the angle of the hood
-        angle = (Math.PI / 2 - Math.atan(y / x)) * (180 / Math.PI);
-        return angle;
+        this.angle = (Math.PI - ((Math.PI / 2) + (Math.atan2(y, x)))) / (2 * Math.PI);
+        return this.angle;
     }
 
     public void setAngle(double target) {
-        kHoodMotor.setControl(positionRequest.withPosition(target));
+        hoodMotor.setControl(positionRequest.withPosition(target));
     }
 
     @Override
     public void periodic() {
+        Logger.recordOutput("Hood/Calculated/Hood Angle", this.angle);
+        Logger.recordOutput("Hood/Angle", hoodMotor.getPosition().getValueAsDouble());
+        Logger.recordOutput("Hood/Supply Current", hoodMotor.getSupplyCurrent().getValueAsDouble());
+        Logger.recordOutput("Hood/Stator Current", hoodMotor.getStatorCurrent().getValueAsDouble());
         // This method will be called once per scheduler run
     }
 }

@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants.RollerConstants;
 import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class RollerSubsystem extends SubsystemBase {
     /** Creates a new RollerSubsystem. */
@@ -57,7 +58,11 @@ public class RollerSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // This method will be called once per scheduler run
-        // System.out.println(isRolling());
+        Logger.recordOutput("Roller/Speed", rollerMotor.getDutyCycle().getValueAsDouble());
+        Logger.recordOutput("Roller/Rolling Status", this.isRolling());
+        Logger.recordOutput(
+                "Roller/Supply Current", rollerMotor.getSupplyCurrent().getValueAsDouble());
+        Logger.recordOutput(
+                "Roller/Stator Current", rollerMotor.getStatorCurrent().getValueAsDouble());
     }
 }

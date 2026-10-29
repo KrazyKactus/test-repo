@@ -9,6 +9,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants.DeployConstants;
 import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class DeploySubsystem extends SubsystemBase {
 
@@ -85,5 +86,14 @@ public class DeploySubsystem extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {}
+    public void periodic() {
+        Logger.recordOutput("Deploy/Position", deployMotor.getPosition().getValueAsDouble());
+        Logger.recordOutput("Deploy/Retract", this.isRetracted());
+        Logger.recordOutput("Deploy/Extended", this.isExtended());
+        Logger.recordOutput("Deploy/Clear", this.isClear());
+        Logger.recordOutput(
+                "Deploy/Supply Current", deployMotor.getSupplyCurrent().getValueAsDouble());
+        Logger.recordOutput(
+                "Deploy/Stator Current", deployMotor.getStatorCurrent().getValueAsDouble());
+    }
 }

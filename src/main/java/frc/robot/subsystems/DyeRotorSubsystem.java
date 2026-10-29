@@ -14,6 +14,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DyeRotorConstants;
 import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class DyeRotorSubsystem extends SubsystemBase {
     /** Creates a new DyeRotorSubsystem. */
@@ -60,5 +61,15 @@ public class DyeRotorSubsystem extends SubsystemBase {
     public void stop() {
         dyeRotorMotor.setControl(neutralRequest);
         dyeRotorMotor.stopMotor();
+    }
+
+    @Override
+    public void periodic() {
+        Logger.recordOutput(
+                "DyeRotor/Torque Current", dyeRotorMotor.getTorqueCurrent().getValueAsDouble());
+        Logger.recordOutput(
+                "DyeRotor/Supply Current", dyeRotorMotor.getSupplyCurrent().getValueAsDouble());
+        Logger.recordOutput(
+                "DyeRotor/Stator Current", dyeRotorMotor.getStatorCurrent().getValueAsDouble());
     }
 }

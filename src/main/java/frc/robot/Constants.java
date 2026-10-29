@@ -26,6 +26,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.Constants.IntakeConstants.FieldConstants;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean constants. This
@@ -70,48 +71,34 @@ public final class Constants {
 
             public static final int kStatorCurrentLimit = 40;
 
-            public static final double kEfficiency = 0.8; // 80% efficiency
+            public static final double kEfficiency = 0.80; // 80% efficiency
 
             public static final int kIdleVelocity = 20; // rps
 
             public static final double kTolerance = 1;
 
-            // moments of inertia calc
-            public static final double kBottomWheelR1 = 0.0508; // 2in
-            public static final double kBottomWheelR2 = 0.0508 - 0.0127; // 2in - 0.5in (width)
-            public static final double kBottomWheelMass = 0.096;
+            public static final double kBottomWheelR1 = 0.0381; // 2in needs to be 3in
+            public static final double kTopWheelR1 = 0.0127; // 1in
 
-            public static final double kTopWheelR1 = 0.0254; // 1in
-            public static double kTopWheelR2; // wheels are small and thus can be approximated as solid
-            public static final double kTopWheelMass = kBottomWheelMass * 0.3; // approx 30% of the bottom wheel mass
-
-            public static final double kStainlessFlywheelInertia = 0.0007901271; // kg*m^2
-            public static final double kCutInertialFlywheelMass = 0.612; // Idk
-            public static final double kCutInertialFlywheelRadius = 0.0762; // 3in
-
-            public static final double kTopWheelInertia = (kTopWheelMass * (Math.pow(kTopWheelR1, 2))) / 2; // 1/2mr^2
-            public static final double kBottomWheelInertia =
-                    (kBottomWheelMass * (Math.pow(kBottomWheelR1, 2))) / 2; // 1/2M(r1^2+r2^2)
-            public static final double kCutInertialFlywheelInertia =
-                    (kCutInertialFlywheelMass * (Math.pow(kCutInertialFlywheelRadius, 2))) / 2;
-
-            public static final double kTotalInertia =
-                    kTopWheelInertia * 6 + kBottomWheelInertia * 6 + kCutInertialFlywheelInertia * 2; // 0.0043525kg*m^2
+            public static final double dy = FieldConstants.hubHeight + FieldConstants.aboveHeight;
+            public static final double vy = Math.sqrt(2 * Constants.kGravity * dy);
+            public static final double kTime =
+                    (vy + Math.sqrt(2 * Constants.kGravity * FieldConstants.aboveHeight)) / (Constants.kGravity);
         }
 
         public static class HoodConstants {
             public static final int kHoodID = 21;
 
-            public static final InvertedValue kInverted = InvertedValue.Clockwise_Positive;
+            public static final InvertedValue kInverted = InvertedValue.CounterClockwise_Positive;
 
             public static final int kStatorCurrentLimit = 40;
 
-            public static final double kGearRatio = 62.5;
+            public static final double kGearRatio = 26;
 
             public static final double kMaxAngle = 35;
             public static final double kIdlePosition = 0.005;
 
-            public static final double kP = 70, kI = 0, kD = 0.18;
+            public static final double kP = 20, kI = 0, kD = 0;
         }
 
         public static class TurretConstants {
@@ -128,9 +115,9 @@ public final class Constants {
             public static final double minAngle = Units.degreesToRadians(-90);
             public static final double maxAngle = Units.degreesToRadians(270);
 
-            public static final double kp = 0, kI = 0, kD = 0;
+            public static final double kp = 10, kI = 0, kD = 0;
 
-            public static final double kMagnetOffset = 0.422;
+            public static final double kMagnetOffset = -0.422;
 
             public static final double kDelay = 0; // input delay on shot
             public static final InterpolatingDoubleTreeMap timeOfFlight = new InterpolatingDoubleTreeMap();
@@ -169,20 +156,20 @@ public final class Constants {
             public static final int kStatorCurrentLimit = 160;
             public static final int kSupplyCurrentLimit = 80;
 
-            public static double kZero = 0.3; // to be tested originally 0.3
-            public static double kExtended = 0;
-            public static double kSpeed = 0.3;
+            public static final double kZero = 0.3; // to be tested originally 0.3
+            public static final double kExtended = 0;
+            public static final double kSpeed = 0.3;
 
-            public static double kTolerance = 0.03;
+            public static final double kTolerance = 0.03;
 
-            public static double kP = 16, kI = 0, kD = 0.15;
-            public static double kG = 1.65; // originally 2
-            public static GravityTypeValue kGravityType = GravityTypeValue.Arm_Cosine;
-            public static double kOffset = -0.03;
+            public static final double kP = 16, kI = 0, kD = 0.15;
+            public static final double kG = 1.65; // originally 2
+            public static final GravityTypeValue kGravityType = GravityTypeValue.Arm_Cosine;
+            public static final double kOffset = -0.03;
 
-            public static double kFF = -1.8;
+            public static final double kFF = -1.8;
 
-            public static double kMechRatio = 14;
+            public static final double kMechRatio = 14;
         }
 
         public static class RollerConstants {
@@ -197,6 +184,9 @@ public final class Constants {
         }
 
         public class FieldConstants {
+            public static final double hubHeight = 1.3;
+            public static final double aboveHeight = 1;
+
             public static final Translation2d redHub = new Translation2d();
             public static final Translation2d bluehub = new Translation2d();
 

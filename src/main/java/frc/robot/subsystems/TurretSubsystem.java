@@ -20,7 +20,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class TurretSubsystem extends SubsystemBase {
     /** Creates a new TurretSubsystem. */
-    private static final TalonFX kTurretMotor = new TalonFX(TurretConstants.kTurretID, TunerConstants.kCANBus);
+    private static final TalonFX turretMotor = new TalonFX(TurretConstants.kTurretID, TunerConstants.kCANBus);
 
     private static final CANcoder kAbsoluteEncoder =
             new CANcoder(TurretConstants.kThroughboreID, TunerConstants.kCANBus);
@@ -48,9 +48,9 @@ public class TurretSubsystem extends SubsystemBase {
 
         var limitConfigs = turretConfig.SoftwareLimitSwitch;
         limitConfigs.ForwardSoftLimitEnable = true;
-        limitConfigs.ForwardSoftLimitThreshold = TurretConstants.maxAngle;
+        limitConfigs.ForwardSoftLimitThreshold = TurretConstants.maxAngle / (2 * Math.PI);
         limitConfigs.ReverseSoftLimitEnable = true;
-        limitConfigs.ReverseSoftLimitThreshold = TurretConstants.minAngle;
+        limitConfigs.ReverseSoftLimitThreshold = TurretConstants.minAngle / (2 * Math.PI);
 
         var slot0Configs = turretConfig.Slot0;
         slot0Configs.kP = HoodConstants.kP;
@@ -59,24 +59,28 @@ public class TurretSubsystem extends SubsystemBase {
 
         absoluteEncoderConfig.MagnetSensor.MagnetOffset = TurretConstants.kMagnetOffset;
 
-        kTurretMotor.clearStickyFaults();
-        kTurretMotor.getConfigurator().apply(turretConfig);
+        turretMotor.clearStickyFaults();
+        turretMotor.getConfigurator().apply(turretConfig);
 
-        kTurretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble() / Math.PI);
+        turretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble() / Math.PI);
     }
 
     public final void setAngle(double position, double velocity) {
-        kTurretMotor.setControl(positionRequest.withPosition(position).withVelocity(velocity));
+        turretMotor.setControl(positionRequest.withPosition(position).withVelocity(velocity));
     }
 
     public final void stop() {
-        kTurretMotor.setControl(neutralRequest);
-        kTurretMotor.stopMotor();
+        turretMotor.setControl(neutralRequest);
+        turretMotor.stopMotor();
     }
 
     @Override
     public void periodic() {
-        Logger.recordOutput("Turret Angle", kTurretMotor.getPosition().getValue());
+        Logger.recordOutput("Turret/Turret Angle", turretMotor.getPosition().getValueAsDouble());
+        Logger.recordOutput(
+                "Turret/Supply Current", turretMotor.getSupplyCurrent().getValueAsDouble());
+        Logger.recordOutput(
+                "Turret/Stator Current", turretMotor.getStatorCurrent().getValueAsDouble());
         // This method will be called once per scheduler run
     }
 }
