@@ -113,7 +113,7 @@ public class RobotContainer {
                         (robotPose) -> {});
                 vision = new Vision(
                         drive,
-                        new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+                        //new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                         new VisionIOPhotonVision(VisionConstants.rightCamera, VisionConstants.robotToCameraRight),
                         new VisionIOPhotonVision(VisionConstants.leftCamera, VisionConstants.robotToCameraLeft));
 

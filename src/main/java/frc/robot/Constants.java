@@ -187,11 +187,8 @@ public final class Constants {
             public static final double hubHeight = 1.3;
             public static final double aboveHeight = 1;
 
-            public static final Translation2d redHub = new Translation2d();
-            public static final Translation2d bluehub = new Translation2d();
-
-            public static final Translation2d redWall = new Translation2d();
-            public static final Translation2d blueWall = new Translation2d();
+            public static final Translation2d redHub = new Translation2d(12, 4.03);;
+            public static final Translation2d bluehub = new Translation2d(4.62, 4.03);
         }
     }
 }

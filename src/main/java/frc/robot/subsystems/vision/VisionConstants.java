@@ -17,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 
 public class VisionConstants {
     // AprilTag layout
@@ -30,8 +31,22 @@ public class VisionConstants {
     // Robot to camera transforms
     // (Not used by Limelight, configure in web UI instead)
     public static Transform3d robotToCamera0 = new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
-    public static Transform3d robotToCameraRight = new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
-    public static Transform3d robotToCameraLeft = new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0));
+    public static Transform3d robotToCameraRight = new Transform3d(
+        Units.inchesToMeters(5), 
+        Units.inchesToMeters(-7.46),
+        Units.inchesToMeters(18.431), 
+        new Rotation3d(
+            Units.degreesToRadians(0), 
+            Units.degreesToRadians(-75), 
+            Units.degreesToRadians(-38.856282)));
+    public static Transform3d robotToCameraLeft = new Transform3d(
+        Units.inchesToMeters(5), 
+        Units.inchesToMeters(7.46),
+        Units.inchesToMeters(18.431), 
+        new Rotation3d(
+            Units.degreesToRadians(0), 
+            Units.degreesToRadians(-75), 
+            Units.degreesToRadians(38.856282)));
 
     // Basic filtering thresholds
     public static double maxAmbiguity = 0.3;
@@ -45,9 +60,9 @@ public class VisionConstants {
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)
     public static double[] cameraStdDevFactors = new double[] {
-        1.0, // Camera 0
-        1.0, // Camera 1
-        1.0 // Camera 2
+            1.0, // Camera 0
+            1.0, // Camera 1
+            1.0 // Camera 2
     };
 
     // Multipliers to apply for MegaTag 2 observations
