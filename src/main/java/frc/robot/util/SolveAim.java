@@ -35,11 +35,7 @@ public class SolveAim {
         Translation2d turretVel = new Translation2d(vx, vy);
 
         Translation2d virtualTarget = target;
-        for (int i = 0; i < 4; i++) {
-            double distance = virtualTarget.minus(turretPos).getNorm();
-            double tof = TurretConstants.timeOfFlight.get(distance);
-            virtualTarget = target.minus(turretVel.times(tof));
-        }
+        virtualTarget = target.minus(turretVel.times(TurretConstants.timeOfFlight));
 
         Translation2d toTarget = virtualTarget.minus(turretPos);
 

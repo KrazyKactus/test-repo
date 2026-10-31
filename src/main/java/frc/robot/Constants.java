@@ -22,7 +22,6 @@ import static edu.wpi.first.units.Units.Amps;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -40,6 +39,7 @@ import frc.robot.Constants.IntakeConstants.FieldConstants;
 public final class Constants {
     public static final double kGravity = 9.8;
     public static final int kSupplyCurrentLimit = 40;
+    public static final double kRobotHeight = 0.5; // metres
 
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
@@ -71,7 +71,7 @@ public final class Constants {
 
             public static final int kStatorCurrentLimit = 40;
 
-            public static final double kEfficiency = 0.85; // 80% efficiency
+            public static final double kEfficiency = 0.75; // 80% efficiency
 
             public static final int kIdleVelocity = 20; // rps
 
@@ -80,10 +80,11 @@ public final class Constants {
             public static final double kBottomWheelR1 = 0.0381; // 2in needs to be 3in
             public static final double kTopWheelR1 = 0.0127; // 1in
 
-            public static final double dy = FieldConstants.hubHeight + FieldConstants.aboveHeight;
+            public static final double aboveHeight = 1.2;
+            public static final double dy = (FieldConstants.hubHeight + aboveHeight) - Constants.kRobotHeight;
             public static final double vy = Math.sqrt(2 * Constants.kGravity * dy);
             public static final double kTime =
-                    (vy + Math.sqrt(2 * Constants.kGravity * FieldConstants.aboveHeight)) / (Constants.kGravity);
+                    (vy + Math.sqrt(2 * Constants.kGravity * aboveHeight)) / (Constants.kGravity);
         }
 
         public static class HoodConstants {
@@ -119,18 +120,10 @@ public final class Constants {
 
             public static final double kMagnetOffset = -0.422;
 
-            public static final double kDelay = 0; // input delay on shot
-            public static final InterpolatingDoubleTreeMap timeOfFlight = new InterpolatingDoubleTreeMap();
+            public static final double kDelay = 0.6; // input delay on shot
+            public static final double timeOfFlight = 1.14;
 
-            static {
-                timeOfFlight.put(1.0, 1.0);
-                timeOfFlight.put(1.5, 1.0);
-                timeOfFlight.put(2.0, 1.0);
-                timeOfFlight.put(2.5, 1.0);
-                timeOfFlight.put(3.0, 1.0);
-            }
-
-            public static final Translation2d robotToTurret = new Translation2d(1, 1);
+            public static final Translation2d robotToTurret = new Translation2d(0, 0);
         }
     }
 
@@ -185,7 +178,6 @@ public final class Constants {
 
         public class FieldConstants {
             public static final double hubHeight = 1.3;
-            public static final double aboveHeight = 1;
 
             public static final Translation2d redHub = new Translation2d(12, 4.03);
             ;
