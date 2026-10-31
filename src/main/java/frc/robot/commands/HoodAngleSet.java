@@ -6,15 +6,16 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.shooter.HoodSubsystem;
+import java.util.function.DoubleSupplier;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class HoodAngleSet extends Command {
     /** Creates a new HoodAngleSet. */
     private HoodSubsystem sys_hood;
 
-    private double setpoint;
+    private DoubleSupplier setpoint;
 
-    public HoodAngleSet(HoodSubsystem hood, double setpoint) {
+    public HoodAngleSet(HoodSubsystem hood, DoubleSupplier setpoint) {
         this.sys_hood = hood;
         this.setpoint = setpoint;
         addRequirements(this.sys_hood);
@@ -28,7 +29,7 @@ public class HoodAngleSet extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        this.sys_hood.setAngle(setpoint);
+        this.sys_hood.setAngle(setpoint.getAsDouble());
     }
 
     // Called once the command ends or is interrupted.

@@ -18,25 +18,25 @@ public class HoodAimShoot extends ParallelCommandGroup {
     private final HoodSubsystem sys_hood;
 
     private final FlywheelSubsystem sys_flywheel;
-    private final double dx;
-    private final double vx;
-    private final double rps;
 
-    private final FlywheelSpin flywheelCommand;
-    private final HoodAngleSet hoodCommand;
+    private FlywheelSpin flywheelCommand;
+    private HoodAngleSet hoodCommand;
 
     public HoodAimShoot(HoodSubsystem hood, FlywheelSubsystem flywheel, DoubleSupplier distance) {
         // Add your commands in the addCommands() call, e.g.
         // addCommands(new FooCommand(), new BarCommand());
         this.sys_hood = hood;
         this.sys_flywheel = flywheel;
-        this.dx = distance.getAsDouble();
-        this.vx = this.sys_flywheel.calculateXVelocity(this.dx);
-        this.rps = this.sys_flywheel.calculateRPS(this.sys_flywheel.calculateVelocity(FlywheelConstants.vy, vx));
 
-        this.flywheelCommand = new FlywheelSpin(this.sys_flywheel, this.rps);
+        this.flywheelCommand = new FlywheelSpin(
+                this.sys_flywheel,
+                () -> this.sys_flywheel.calculateRPS(this.sys_flywheel.calculateVelocity(
+                        FlywheelConstants.vy, this.sys_flywheel.calculateXVelocity(distance.getAsDouble()))));
 
-        this.hoodCommand = new HoodAngleSet(this.sys_hood, this.sys_hood.calculateAngle(FlywheelConstants.vy, vx));
+        this.hoodCommand = new HoodAngleSet(
+                this.sys_hood,
+                () -> this.sys_hood.calculateAngle(
+                        FlywheelConstants.vy, this.sys_flywheel.calculateXVelocity(distance.getAsDouble())));
 
         addCommands(flywheelCommand, hoodCommand);
     }

@@ -71,7 +71,7 @@ public final class Constants {
 
             public static final int kStatorCurrentLimit = 40;
 
-            public static final double kEfficiency = 0.80; // 80% efficiency
+            public static final double kEfficiency = 0.85; // 80% efficiency
 
             public static final int kIdleVelocity = 20; // rps
 
@@ -98,7 +98,7 @@ public final class Constants {
             public static final double kMaxAngle = 35;
             public static final double kIdlePosition = 0.005;
 
-            public static final double kP = 20, kI = 0, kD = 0;
+            public static final double kP = 10, kI = 0, kD = 0;
         }
 
         public static class TurretConstants {
@@ -113,7 +113,7 @@ public final class Constants {
             public static final double kGearRatio = 56.25;
 
             public static final double minAngle = Units.degreesToRadians(-90);
-            public static final double maxAngle = Units.degreesToRadians(270);
+            public static final double maxAngle = Units.degreesToRadians(90);
 
             public static final double kp = 10, kI = 0, kD = 0;
 
@@ -163,7 +163,7 @@ public final class Constants {
             public static final double kTolerance = 0.03;
 
             public static final double kP = 16, kI = 0, kD = 0.15;
-            public static final double kG = 1.65; // originally 2
+            public static final double kG = 1.5; // originally 1.65
             public static final GravityTypeValue kGravityType = GravityTypeValue.Arm_Cosine;
             public static final double kOffset = -0.03;
 
@@ -178,7 +178,7 @@ public final class Constants {
             public static final InvertedValue kInverted = InvertedValue.Clockwise_Positive;
             public static final int kStatorCurrentLimit = 40;
 
-            public static final double kForwardSpeed = 0.95;
+            public static final double kForwardSpeed = 0.80;
             public static final double kAgitateSpeed = 0.8;
             public static final double kReverseSpeed = -0.35;
         }
@@ -187,7 +187,8 @@ public final class Constants {
             public static final double hubHeight = 1.3;
             public static final double aboveHeight = 1;
 
-            public static final Translation2d redHub = new Translation2d(12, 4.03);;
+            public static final Translation2d redHub = new Translation2d(12, 4.03);
+            ;
             public static final Translation2d bluehub = new Translation2d(4.62, 4.03);
         }
     }

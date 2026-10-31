@@ -41,7 +41,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         var motorOutputConfigs = turretConfig.MotorOutput;
         motorOutputConfigs.Inverted = TurretConstants.kInverted;
-        motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
+        motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
 
         var feedbackConfigs = turretConfig.Feedback;
         feedbackConfigs.SensorToMechanismRatio = TurretConstants.kGearRatio;
@@ -62,11 +62,15 @@ public class TurretSubsystem extends SubsystemBase {
         turretMotor.clearStickyFaults();
         turretMotor.getConfigurator().apply(turretConfig);
 
-        turretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble() / Math.PI);
+        turretMotor.setPosition(kAbsoluteEncoder.getPosition().getValueAsDouble() * 2);
     }
 
     public final void setAngle(double position, double velocity) {
         turretMotor.setControl(positionRequest.withPosition(position).withVelocity(velocity));
+    }
+
+    public final double getAngle() {
+        return turretMotor.getPosition().getValueAsDouble();
     }
 
     public final void stop() {
@@ -76,7 +80,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        Logger.recordOutput("Turret/Turret Angle", turretMotor.getPosition().getValueAsDouble());
+        Logger.recordOutput("Turret/Turret Angle", turretMotor.getPosition().getValueAsDouble() * 360);
         Logger.recordOutput(
                 "Turret/Supply Current", turretMotor.getSupplyCurrent().getValueAsDouble());
         Logger.recordOutput(

@@ -37,7 +37,6 @@ import frc.robot.Constants.IntakeConstants.RollerConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DyeRotorSpin;
 import frc.robot.commands.HoodAimShoot;
-import frc.robot.commands.HoodIdle;
 import frc.robot.commands.IntakeAgitate;
 import frc.robot.commands.IntakeDeploy;
 import frc.robot.commands.IntakeSpin;
@@ -59,7 +58,6 @@ import frc.robot.subsystems.shooter.HoodSubsystem;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.ironmaple.simulation.SimulatedArena;
@@ -113,7 +111,7 @@ public class RobotContainer {
                         (robotPose) -> {});
                 vision = new Vision(
                         drive,
-                        //new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+                        // new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                         new VisionIOPhotonVision(VisionConstants.rightCamera, VisionConstants.robotToCameraRight),
                         new VisionIOPhotonVision(VisionConstants.leftCamera, VisionConstants.robotToCameraLeft));
 
@@ -143,7 +141,7 @@ public class RobotContainer {
                         new HoodAimShoot(
                                 hoodSubsystem,
                                 flywheelSubsystem,
-                                drive.calculateDistanceToPoint(
+                                () -> drive.calculateDistanceToPoint(
                                         DriverStation.getAlliance().get() == Alliance.Red
                                                 ? FieldConstants.redHub
                                                 : FieldConstants.bluehub)),
@@ -285,7 +283,7 @@ public class RobotContainer {
 
         switch (Constants.currentMode) {
             case REAL:
-                hoodSubsystem.setDefaultCommand(new HoodIdle(hoodSubsystem));
+                // hoodSubsystem.setDefaultCommand(new HoodIdle(hoodSubsystem));
                 deploySubsystem.setDefaultCommand(new IntakeDeploy(deploySubsystem, DeployConstants.kExtended));
 
                 // run rollers in an intaking direction
@@ -307,7 +305,10 @@ public class RobotContainer {
                                 new SequentialCommandGroup(
                                         new WaitCommand(0.5),
                                         new DyeRotorSpin(dyeRotorSubsystem, DyeRotorConstants.kForwardAmperage)),
-                                new HoodAimShoot(hoodSubsystem, flywheelSubsystem, () -> 2)));
+                                new HoodAimShoot(
+                                        hoodSubsystem,
+                                        flywheelSubsystem,
+                                        () -> drive.calculateDistanceToPoint(FieldConstants.redHub))));
 
                 controller
                         .povDown()
@@ -316,6 +317,11 @@ public class RobotContainer {
                                 new IntakeSpin(rollerSubsystem, RollerConstants.kForwardSpeed)));
 
                 controller.b().onTrue(Commands.runOnce(() -> hasPressed = !hasPressed));
+
+                controller
+                        .leftBumper()
+                        .whileTrue(new ShootOnTheMove(
+                                drive, turretSubsystem, flywheelSubsystem, hoodSubsystem, FieldConstants.redHub));
 
                 break;
 

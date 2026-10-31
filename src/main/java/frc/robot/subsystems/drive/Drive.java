@@ -52,6 +52,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants.FieldConstants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.Vision;
@@ -59,7 +60,6 @@ import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -236,6 +236,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+
+        Logger.recordOutput("Distance to Point", this.calculateDistanceToPoint(FieldConstants.redHub));
     }
 
     /**
@@ -383,15 +385,15 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         };
     }
 
-    public DoubleSupplier calculateDistanceToPoint(Translation2d targetPose) {
-        return () -> this.getPose().getTranslation().getDistance(targetPose);
+    public double calculateDistanceToPoint(Translation2d targetPose) {
+        return this.getPose().getTranslation().getDistance(targetPose);
     }
 
     public Supplier<Rotation2d> calculateAngleToPoint(Translation2d target) {
         return () -> {
             Translation2d robotTranslation = this.getPose().getTranslation();
             Translation2d delta = target.minus(robotTranslation);
-            return delta.getAngle();
+            return delta.getAngle().minus(this.getRotation());
         };
     }
 }
